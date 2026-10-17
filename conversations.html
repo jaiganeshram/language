@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ta" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>BhashaTamil - நேரடி உரையாடல்கள் (Real Conversations + English)</title>
+  
+  <meta name="description" content="தமிழ், ஆங்கிலம், தெலுங்கு, கன்னடம் மற்றும் இந்தியில் நேரடி சூழல் உரையாடல்கள் (Real-Life Conversations).">
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+</head>
+<body>
+
+  <!-- Sticky Top Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-block">
+        <div class="brand-icon">💬</div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">BhashaTamil</span>
+          <span class="brand-subtitle">நேரடி உரையாடல்கள் (Real Conversations + English)</span>
+        </div>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="header-search-wrap">
+        <span class="search-icon-symbol">🔍</span>
+        <input 
+          type="text" 
+          id="convo-search" 
+          class="search-input" 
+          placeholder="உரையாடலில் தேடுக (எ.கா: ஆட்டோ, தோசை, bill, price, help)..."
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Top Actions -->
+      <div class="header-actions">
+        <div class="speed-control-box">
+          <label for="speed-select" class="speed-label">ஒலி:</label>
+          <select id="speed-select" class="select-input">
+            <option value="0.75">மெதுவாக (0.75x)</option>
+            <option value="0.85" selected>இயல்பானது (0.85x)</option>
+            <option value="1.0">வேகமாக (1.0x)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-sm btn-outline print-btn" onclick="window.print()" title="அச்சு எடுக்க / PDF">
+          🖨️ அச்சு எடுக்க (Print)
+        </button>
+
+        <button id="theme-toggle-btn" class="btn btn-sm btn-outline" onclick="window.convoApp.toggleTheme()" title="பகல்/இரவு பயன்முறை">
+          ☀️ பகல் முறை
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Navigation Bar -->
+  <nav class="page-nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="page-nav-item">
+        📖 சொற்கள் ஒப்பீட்டு அட்டவணை (173 Words)
+      </a>
+      <a href="conversations.html" class="page-nav-item active">
+        💬 நேரடி உரையாடல்கள் (Conversations)
+      </a>
+      <a href="stories.html" class="page-nav-item">
+        📚 15 வரிக் கதைகள் (Stories)
+      </a>
+      <a href="daily_reading.html" class="page-nav-item">
+        🖼️ தினசரி வாசிப்பு & கதைகள் (Daily Reading)
+      </a>
+      <a href="short_descriptions.html" class="page-nav-item">
+        📝 சிறு விவரிப்புகள் (Short Descriptions)
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="main-table-wrapper">
+    <!-- Notice Banner -->
+    <div class="table-intro-banner">
+      <div class="intro-content">
+        <h1 class="table-main-title">நடைமுறை சூழல் உரையாடல்கள் (Real-Life Situational Conversations)</h1>
+        <p class="table-desc">
+          ஆட்டோ பிடிப்பது, ஹோட்டலில் சாப்பிடுவது, கடையில் பேரம் பேசுவது போன்ற அன்றாட சூழ்நிலைகளில் இயல்பாகப் பேச உதவும் முழுமையான உரையாடல்கள். <strong>தமிழ் மற்றும் ஆங்கிலம் (English)</strong> இரண்டிலும் கொடுக்கப்பட்டுள்ளது. பக்கத்தில் உள்ள <strong>🔊 ஒலி</strong> பொத்தானை அழுத்தி உச்சரிப்பைக் கேட்டுப் பேசுங்கள்!
+        </p>
+      </div>
+      <div class="total-badge" id="total-convo-badge">8 உரையாடல்கள் | 63 வாக்கியங்கள்</div>
+    </div>
+
+    <!-- Table View Switcher (To-Learn Table vs Read Table) -->
+    <div class="table-mode-tabs-wrapper">
+      <div class="table-mode-tabs">
+        <button class="mode-tab-btn active" id="tab-to-learn" onclick="window.convoApp.switchMode('to-learn')">
+          📖 படிக்க வேண்டியவை (<span id="unread-count">0</span>)
+        </button>
+        <button class="mode-tab-btn" id="tab-read" onclick="window.convoApp.switchMode('read')">
+          ✅ படித்தவை (Read Table) (<span id="read-count">0</span>)
+        </button>
+      </div>
+
+      <div class="read-mode-actions" id="read-mode-actions" style="display: none;">
+        <button class="btn btn-sm btn-outline btn-reset-all" onclick="window.convoApp.resetAllRead()" title="அனைத்து உரையாடல் வரிகளையும் மீண்டும் படிக்க வேண்டிய பட்டியலில் சேர்க்க">
+          🔄 அனைத்தையும் மீட்டமை (Reset All)
+        </button>
+      </div>
+    </div>
+
+    <!-- Topic Selector Bar -->
+    <div class="convo-topic-bar" id="convo-topic-bar">
+      <!-- Injected by js/conversations.js -->
+    </div>
+
+    <!-- Conversations Container -->
+    <div class="conversations-wrapper" id="conversations-wrapper">
+      <!-- Injected by js/conversations.js -->
+    </div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/data/conversations_data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/conversations.js"></script>
+</body>
+</html>

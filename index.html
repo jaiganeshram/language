@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ta" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>BhashaTamil - தமிழ் வழி தெலுங்கு, கன்னடம், இந்தி ஒப்பீட்டு அட்டவணை</title>
+  
+  <meta name="description" content="தமிழ் எழுத்துக்களைக் கொண்டே தெலுங்கு, கன்னடம், இந்தி ஆகிய மூன்று மொழிகளையும் எளிதில் பேச உதவும் முழுமையான ஒப்பீட்டு அட்டவணை.">
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗣️</text></svg>">
+</head>
+<body>
+
+  <!-- Sticky Top Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-block">
+        <div class="brand-icon">த</div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">BhashaTamil</span>
+          <span class="brand-subtitle">தமிழ் வழி நேரடிப் பேச்சு அட்டவணை (Spoken Language Table)</span>
+        </div>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="header-search-wrap">
+        <span class="search-icon-symbol">🔍</span>
+        <input 
+          type="text" 
+          id="global-search" 
+          class="search-input" 
+          placeholder="சொல்லைத் தேடுக (எ.கா: வணக்கம், எங்கே, தண்ணீர், சாப்பிட்டீர்களா)..."
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Top Actions -->
+      <div class="header-actions">
+        <div class="speed-control-box">
+          <label for="speed-select" class="speed-label">ஒலி:</label>
+          <select id="speed-select" class="select-input">
+            <option value="0.75">மெதுவாக (0.75x)</option>
+            <option value="0.85" selected>இயல்பானது (0.85x)</option>
+            <option value="1.0">வேகமாக (1.0x)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-sm btn-outline print-btn" onclick="window.print()" title="அச்சு எடுக்க / PDF">
+          🖨️ அச்சு எடுக்க (Print)
+        </button>
+
+        <button id="theme-toggle-btn" class="btn btn-sm btn-outline" onclick="window.bhashaApp.toggleTheme()" title="பகல்/இரவு பயன்முறை">
+          ☀️ பகல் முறை
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Navigation Bar -->
+  <nav class="page-nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="page-nav-item active">
+        📖 சொற்கள் ஒப்பீட்டு அட்டவணை (173 Words)
+      </a>
+      <a href="conversations.html" class="page-nav-item">
+        💬 நேரடி உரையாடல்கள் (Conversations)
+      </a>
+      <a href="stories.html" class="page-nav-item">
+        📚 15 வரிக் கதைகள் (Stories)
+      </a>
+      <a href="daily_reading.html" class="page-nav-item">
+        🖼️ தினசரி வாசிப்பு & கதைகள் (Daily Reading)
+      </a>
+      <a href="short_descriptions.html" class="page-nav-item">
+        📝 சிறு விவரிப்புகள் (Short Descriptions)
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="main-table-wrapper">
+    <!-- Notice Banner -->
+    <div class="table-intro-banner">
+      <div class="intro-content">
+        <h1 class="table-main-title">தெலுங்கு, கன்னடம், இந்தி நேரடிப் பேச்சு ஒப்பீட்டு அட்டவணை</h1>
+        <p class="table-desc">
+          பிற மொழி எழுத்துக்களைப் படிக்கத் தேவையில்லை! <strong>தமிழ் எழுத்துக்களிலேயே</strong> வாசித்து, பக்கத்தில் உள்ள <strong>🔊 ஒலி</strong> பொத்தானை அழுத்தி உச்சரிப்பைக் கேட்டு எளிதாகப் பேசுங்கள்.
+        </p>
+      </div>
+      <div class="total-badge" id="total-count-badge">மொத்த சொற்கள்: 0</div>
+    </div>
+
+    <!-- Table View Switcher (To-Learn Table vs Read Table) -->
+    <div class="table-mode-tabs-wrapper">
+      <div class="table-mode-tabs">
+        <button class="mode-tab-btn active" id="tab-to-learn" onclick="window.bhashaApp.switchMode('to-learn')">
+          📖 படிக்க வேண்டியவை (<span id="unread-count">0</span>)
+        </button>
+        <button class="mode-tab-btn" id="tab-read" onclick="window.bhashaApp.switchMode('read')">
+          ✅ படித்தவை (Read Table) (<span id="read-count">0</span>)
+        </button>
+      </div>
+
+      <div class="read-mode-actions" id="read-mode-actions" style="display: none;">
+        <button class="btn btn-sm btn-outline btn-reset-all" onclick="window.bhashaApp.resetAllRead()" title="அனைத்துச் சொற்களையும் மீண்டும் படிக்க வேண்டிய பட்டியலில் சேர்க்க">
+          🔄 அனைத்தையும் மீட்டமை (Reset All)
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Filter Bar -->
+    <div class="category-filter-bar" id="category-filter-bar">
+      <!-- Injected by app.js -->
+    </div>
+
+    <!-- Master Spoken Table Container -->
+    <div class="table-container-card">
+      <div class="table-responsive">
+        <table class="master-spoken-table" id="master-spoken-table">
+          <thead>
+            <tr class="table-head-row">
+              <th class="th-num">#</th>
+              <th class="th-tamil">தமிழ்</th>
+              <th class="th-te">தெலுங்கில் பேச</th>
+              <th class="th-kn">கன்னடத்தில் பேச</th>
+              <th class="th-hi">இந்தியில் பேச</th>
+              <th class="th-action">Read</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Injected by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/data/master_table.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

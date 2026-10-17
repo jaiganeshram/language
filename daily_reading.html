@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ta" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>BhashaTamil - தினசரி வாசிப்பு & கதைகள் (Daily Stories & Picture Reading)</title>
+  
+  <meta name="description" content="தினசரி வாசிப்பு, படங்கள் விவரித்தல் மற்றும் நற்பண்புக் கதைகள் - தமிழ், ஆங்கிலம், தெலுங்கு, கன்னடம் மற்றும் இந்தியில் தனித்தனி பேனல்களில் (Separate Panels).">
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+</head>
+<body>
+
+  <!-- Sticky Top Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-block">
+        <div class="brand-icon">🖼️</div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">BhashaTamil</span>
+          <span class="brand-subtitle">தினசரி வாசிப்பு & கதைகள் (5 Languages)</span>
+        </div>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="header-search-wrap">
+        <span class="search-icon-symbol">🔍</span>
+        <input 
+          type="text" 
+          id="story-search" 
+          class="search-input" 
+          placeholder="வாசிப்புப் பகுதிகளில் தேடுக (எ.கா: teacher, auto, supermarket, தோட்டம், வங்கி, library)..."
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Top Actions -->
+      <div class="header-actions">
+        <div class="speed-control-box">
+          <label for="speed-select" class="speed-label">ஒலி:</label>
+          <select id="speed-select" class="select-input">
+            <option value="0.75">மெதுவாக (0.75x)</option>
+            <option value="0.85" selected>இயல்பானது (0.85x)</option>
+            <option value="1.0">வேகமாக (1.0x)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-sm btn-outline print-btn" onclick="window.print()" title="அச்சு எடுக்க / PDF">
+          🖨️ அச்சு எடுக்க (Print)
+        </button>
+
+        <button id="theme-toggle-btn" class="btn btn-sm btn-outline" onclick="window.dailyApp.toggleTheme()" title="பகல்/இரவு பயன்முறை">
+          ☀️ பகல் முறை
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Navigation Bar (5-Tab Universal Header) -->
+  <nav class="page-nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="page-nav-item">
+        📖 சொற்கள் ஒப்பீட்டு அட்டவணை (173 Words)
+      </a>
+      <a href="conversations.html" class="page-nav-item">
+        💬 நேரடி உரையாடல்கள் (Conversations)
+      </a>
+      <a href="stories.html" class="page-nav-item">
+        📚 15 வரிக் கதைகள் (Classic Stories)
+      </a>
+      <a href="daily_reading.html" class="page-nav-item active">
+        🖼️ தினசரி வாசிப்பு & கதைகள் (Daily Reading)
+      </a>
+      <a href="short_descriptions.html" class="page-nav-item">
+        📝 சிறு விவரிப்புகள் (Short Descriptions)
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="main-table-wrapper">
+
+
+    <!-- Table View Switcher (To-Learn Stories vs Read Stories) -->
+    <div class="table-mode-tabs-wrapper">
+      <div class="table-mode-tabs">
+        <button class="mode-tab-btn active" id="tab-to-learn" onclick="window.dailyApp.switchMode('to-learn')">
+          📖 படிக்க வேண்டியவை (<span id="unread-count">0</span>)
+        </button>
+        <button class="mode-tab-btn" id="tab-read" onclick="window.dailyApp.switchMode('read')">
+          ✅ படித்தவை (Read Items) (<span id="read-count">0</span>)
+        </button>
+      </div>
+
+      <div class="read-mode-actions" id="read-mode-actions" style="display: none;">
+        <button class="btn btn-sm btn-outline btn-reset-all" onclick="window.dailyApp.resetAllRead()" title="அனைத்துப் பகுதிகளையும் மீண்டும் படிக்க வேண்டிய பட்டியலில் சேர்க்க">
+          🔄 அனைத்தையும் மீட்டமை (Reset All)
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Filter Bar -->
+    <div style="margin-bottom: 0.75rem;">
+      <div style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.4rem;">
+        பிரிவு வாரியாக வடிகட்டு (Filter by Category):
+      </div>
+      <div class="convo-topic-bar" id="category-filter-bar">
+        <!-- Injected by js/daily_reading.js -->
+      </div>
+    </div>
+
+    <!-- Story Quick Navigation & Selector Bar (Compact & Easy Dropdown) -->
+    <div class="story-nav-dropdown-bar">
+      <div class="nav-dropdown-left">
+        <label for="story-select-dropdown" class="story-dropdown-label">
+          📖 குறிப்பிட்ட கதையைத் தேர்வு செய்ய (Jump to Story):
+        </label>
+        <div class="story-select-wrapper">
+          <select id="story-select-dropdown" class="story-dropdown-select" onchange="window.dailyApp.filterStory(this.value)">
+            <!-- Injected by js/daily_reading.js -->
+          </select>
+        </div>
+        <button class="btn btn-view-action story-bar-view-btn" id="btn-view-story-nav" onclick="window.dailyApp.openSelectedLightbox()" title="தேர்வு செய்த கதையை ஒப்பிட்டுப் பார்க்க (Side-by-Side Lightbox View)">
+          👁️ View (ஒப்பீடு)
+        </button>
+      </div>
+
+      <div class="nav-dropdown-right">
+        <button class="btn btn-sm btn-outline story-nav-btn" id="btn-prev-story" onclick="window.dailyApp.navigateStory(-1)" title="முந்தைய கதைக்குச் செல்">
+          ◀ முந்தையது (Prev)
+        </button>
+        <button class="btn btn-sm btn-outline story-nav-btn active" id="btn-all-stories" onclick="window.dailyApp.filterStory('all')" title="அனைத்துக் கதைகளையும் தொடர்ச்சியாகக் காட்டு">
+          📑 அனைத்தும் (All)
+        </button>
+        <button class="btn btn-sm btn-outline story-nav-btn" id="btn-next-story" onclick="window.dailyApp.navigateStory(1)" title="அடுத்த கதைக்குச் செல்">
+          அடுத்தது (Next) ▶
+        </button>
+      </div>
+    </div>
+
+    <!-- Language Filter Toolbar inside Single Panel -->
+    <div class="lang-filter-bar">
+      <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-muted); margin-right: 0.4rem;">காண்பிக்க வேண்டிய மொழிகள்:</span>
+      <button class="lang-filter-btn active" id="filter-lang-all" onclick="window.dailyApp.setLangView('all')">
+        🌐 அனைத்து 5 மொழிகளும் (All 5 Languages)
+      </button>
+      <button class="lang-filter-btn" id="filter-lang-ta-en" onclick="window.dailyApp.setLangView('ta_en')">
+        🇮🇳 தமிழ் + 🇬🇧 English மட்டும் (Fast Reading)
+      </button>
+      <button class="lang-filter-btn" id="filter-lang-spoken" onclick="window.dailyApp.setLangView('spoken')">
+        🗣️ தெலுங்கு, கன்னடம், இந்தி உச்சரிப்பு (Spoken Practice)
+      </button>
+    </div>
+
+    <!-- Active Filter / Status Summary Badge -->
+    <div id="filtered-story-count-badge" style="font-size: 0.88rem; color: var(--text-muted); font-weight: 600; margin-bottom: 1.25rem;"></div>
+
+    <!-- Stories & Passages Container -->
+    <div class="stories-wrapper" id="stories-list-container">
+      <!-- Injected by js/daily_reading.js -->
+    </div>
+  </main>
+
+  <!-- Story Comparison Lightbox Modal (Side-by-Side View with Combo Box) -->
+  <div class="story-lightbox-overlay" id="story-lightbox" style="display: none;" onclick="window.dailyApp.closeLightbox(event)">
+    <div class="story-lightbox-container" onclick="event.stopPropagation()">
+      <!-- Lightbox Header (Ultra-Compact Single Row) -->
+      <div class="lightbox-header">
+        <div class="lightbox-title-wrap">
+          <span class="lightbox-icon" id="lb-icon">📖</span>
+          <h2 class="lightbox-title-ta" id="lb-title-ta">கதைத் தலைப்பு</h2>
+          <span class="lightbox-title-en" id="lb-title-en">Story Title English</span>
+          <span class="lightbox-badge" id="lb-badge">Story</span>
+        </div>
+        <div class="lightbox-header-actions">
+          <select id="lb-story-jump-select" class="lightbox-story-jump-select" onchange="window.dailyApp.openLightbox(this.value)" title="வேறு கதையைத் தேர்வு செய்ய (Switch Story)">
+            <!-- Injected by js/daily_reading.js -->
+          </select>
+          <button class="lightbox-close-btn" onclick="window.dailyApp.closeLightbox()" title="மூடுக (Close - Esc)">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Lightbox Split Body: Left Tamil, Right Other Language with Combo Box -->
+      <div class="lightbox-split-body">
+        <!-- Left Panel: Fixed Tamil Content -->
+        <div class="lightbox-col lightbox-col-left">
+          <div class="lightbox-col-header">
+            <span class="slate-lang-badge badge-ta">🇮🇳 தமிழ் (Tamil)</span>
+            <button class="slate-audio-btn btn-ta" id="lb-btn-audio-ta" title="தமிழில் முழுப் பத்தியையும் கேட்க">
+              🔊 தமிழில் கேட்க
+            </button>
+          </div>
+          <div class="lightbox-content-box text-tamil" id="lb-content-tamil">
+            <!-- Injected by js/daily_reading.js -->
+          </div>
+        </div>
+
+        <!-- Right Panel: Switchable Other Content via Combo Box -->
+        <div class="lightbox-col lightbox-col-right">
+          <div class="lightbox-col-header">
+            <select id="lb-lang-combo" class="lightbox-combo-select" onchange="window.dailyApp.changeLightboxLang(this.value)" title="மொழியைத் தேர்வு செய்க">
+              <option value="english">🇬🇧 English (ஆங்கிலம்)</option>
+              <option value="telugu">🗣️ தெலுங்கில் பேச (Telugu)</option>
+              <option value="kannada">🗣️ கன்னடத்தில் பேச (Kannada)</option>
+              <option value="hindi">🗣️ இந்தியில் பேச (Hindi)</option>
+            </select>
+            <button class="slate-audio-btn btn-en" id="lb-btn-audio-other" title="ஒலி கேட்க">
+              🔊 Listen English
+            </button>
+          </div>
+          <div class="lightbox-content-box" id="lb-content-other">
+            <!-- Injected by js/daily_reading.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Lightbox Footer (Collapsible Summary & Vocab) -->
+      <div class="lightbox-footer-wrapper" id="lb-footer-wrapper">
+        <!-- Expandable Drawer for Summary & Vocab -->
+        <div class="lightbox-footer-drawer" id="lb-footer-drawer">
+          <div class="lightbox-vocab-summary" id="lb-vocab-summary">
+            <!-- Vocab & summary injected here -->
+          </div>
+        </div>
+
+        <!-- Sleek Single-Line Action Bar -->
+        <div class="lightbox-footer-bar">
+          <button class="btn btn-sm btn-outline lb-collapse-toggle-btn" id="lb-collapse-toggle-btn" onclick="window.dailyApp.toggleLightboxFooter()" title="புதிய சொற்கள் மற்றும் குறிப்புகளை சுருக்கு / காட்டு">
+            <span id="lb-collapse-icon">✨</span>
+            <span id="lb-collapse-text">புதிய சொற்கள் &amp; குறிப்பு (Vocab) ▲</span>
+          </button>
+
+          <div class="lightbox-footer-controls">
+            <button class="btn btn-sm btn-outline lb-nav-btn" id="lb-prev-btn" onclick="window.dailyApp.navigateLightbox(-1)" title="முந்தைய கதை">
+              ◀ முந்தைய கதை (Prev)
+            </button>
+            <button class="btn btn-sm btn-outline lb-nav-btn" id="lb-next-btn" onclick="window.dailyApp.navigateLightbox(1)" title="அடுத்த கதை">
+              அடுத்த கதை (Next) ▶
+            </button>
+            <button class="btn btn-sm btn-outline lb-close-action" onclick="window.dailyApp.closeLightbox()">
+              மூடு (Close)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/data/daily_reading_data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/daily_reading.js"></script>
+</body>
+</html>

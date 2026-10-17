@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ta" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>BhashaTamil - 15 வரிக் கதைகள் (Stories in 5 Languages)</title>
+  
+  <meta name="description" content="15 வரிக் கதைகள் - தமிழ், ஆங்கிலம், தெலுங்கு, கன்னடம் மற்றும் இந்தியில் தனித்தனி பேனல்களில் (Separate Panels).">
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+</head>
+<body>
+
+  <!-- Sticky Top Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand-block">
+        <div class="brand-icon">📚</div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">BhashaTamil</span>
+          <span class="brand-subtitle">15 வரிக் கதைகள் (Stories in 5 Languages)</span>
+        </div>
+      </div>
+
+      <!-- Quick Search -->
+      <div class="header-search-wrap">
+        <span class="search-icon-symbol">🔍</span>
+        <input 
+          type="text" 
+          id="story-search" 
+          class="search-input" 
+          placeholder="கதைகளில் தேடுக (எ.கா: காகம், சிங்கம், முயல், crow, water)..."
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Top Actions -->
+      <div class="header-actions">
+        <div class="speed-control-box">
+          <label for="speed-select" class="speed-label">ஒலி:</label>
+          <select id="speed-select" class="select-input">
+            <option value="0.75">மெதுவாக (0.75x)</option>
+            <option value="0.85" selected>இயல்பானது (0.85x)</option>
+            <option value="1.0">வேகமாக (1.0x)</option>
+          </select>
+        </div>
+
+        <button class="btn btn-sm btn-outline print-btn" onclick="window.print()" title="அச்சு எடுக்க / PDF">
+          🖨️ அச்சு எடுக்க (Print)
+        </button>
+
+        <button id="theme-toggle-btn" class="btn btn-sm btn-outline" onclick="window.storyApp.toggleTheme()" title="பகல்/இரவு பயன்முறை">
+          ☀️ பகல் முறை
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Navigation Bar -->
+  <nav class="page-nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="page-nav-item">
+        📖 சொற்கள் ஒப்பீட்டு அட்டவணை (173 Words & Sentences)
+      </a>
+      <a href="conversations.html" class="page-nav-item">
+        💬 நேரடி உரையாடல்கள் (Conversations + English)
+      </a>
+      <a href="stories.html" class="page-nav-item active">
+        📚 15 வரிக் கதைகள் (Stories in 5 Languages)
+      </a>
+      <a href="daily_reading.html" class="page-nav-item">
+        🖼️ தினசரி வாசிப்பு & கதைகள் (Daily Reading)
+      </a>
+      <a href="short_descriptions.html" class="page-nav-item">
+        📝 சிறு விவரிப்புகள் (Short Descriptions)
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="main-table-wrapper">
+    <!-- Notice Banner -->
+    <div class="table-intro-banner">
+      <div class="intro-content">
+        <h1 class="table-main-title">15 வரிக் கதைகள் (Stories in 5 Languages)</h1>
+        <p class="table-desc">
+          ஒவ்வொரு கதையும் <strong>15 எளிய வரிகளில்</strong> அமைந்திருக்கிறது. <strong>தமிழ், ஆங்கிலம், தெலுங்கு, கன்னடம், இந்தி</strong> ஆகிய 5 மொழிகளிலும் தனித்தனி பேனல்களில் (Separate Panels) வரிசையாகப் படிக்கலாம். உச்சரிப்பைக் கேட்க <strong>🔊 ஒலி</strong> பொத்தானைப் பயன்படுத்துங்கள்!
+        </p>
+      </div>
+      <div class="total-badge" id="total-story-badge">12 சிறுகதைகள் | 180 வாக்கியங்கள்</div>
+    </div>
+
+    <!-- Table View Switcher (To-Learn Stories vs Read Stories) -->
+    <div class="table-mode-tabs-wrapper">
+      <div class="table-mode-tabs">
+        <button class="mode-tab-btn active" id="tab-to-learn" onclick="window.storyApp.switchMode('to-learn')">
+          📖 படிக்க வேண்டியவை (<span id="unread-count">0</span>)
+        </button>
+        <button class="mode-tab-btn" id="tab-read" onclick="window.storyApp.switchMode('read')">
+          ✅ படித்தவை (Read Stories) (<span id="read-count">0</span>)
+        </button>
+      </div>
+
+      <div class="read-mode-actions" id="read-mode-actions" style="display: none;">
+        <button class="btn btn-sm btn-outline btn-reset-all" onclick="window.storyApp.resetAllRead()" title="அனைத்துக் கதைகளையும் மீண்டும் படிக்க வேண்டிய பட்டியலில் சேர்க்க">
+          🔄 அனைத்தையும் மீட்டமை (Reset All)
+        </button>
+      </div>
+    </div>
+
+    <!-- Story Selector Bar -->
+    <div class="convo-topic-bar" id="story-selector-bar">
+      <!-- Injected by js/stories.js -->
+    </div>
+
+    <!-- Story Display Mode & Audio Bar -->
+    <div class="story-controls-bar">
+      <div class="story-view-tabs" id="story-view-tabs">
+        <button class="mode-tab-btn active" id="view-parallel" onclick="window.storyApp.switchView('parallel')">
+          📑 ஒப்பீட்டு பேனல்கள் (5 Language Panels)
+        </button>
+        <button class="mode-tab-btn" id="view-tabs" onclick="window.storyApp.switchView('single')">
+          🗂️ மொழி வாரியாகப் படிக்க (Single Language Reader)
+        </button>
+      </div>
+
+      <!-- Language selector for Single Language Reader (hidden by default) -->
+      <div class="story-lang-filter" id="story-lang-filter" style="display: none;">
+        <span class="filter-label">மொழியைத் தேர்வு செய்க:</span>
+        <button class="btn btn-sm btn-outline lang-pill-btn active" onclick="window.storyApp.selectReaderLang('tamil')">தமிழ்</button>
+        <button class="btn btn-sm btn-outline lang-pill-btn" onclick="window.storyApp.selectReaderLang('english')">English</button>
+        <button class="btn btn-sm btn-outline lang-pill-btn" onclick="window.storyApp.selectReaderLang('telugu')">தெலுங்கு</button>
+        <button class="btn btn-sm btn-outline lang-pill-btn" onclick="window.storyApp.selectReaderLang('kannada')">கன்னடம்</button>
+        <button class="btn btn-sm btn-outline lang-pill-btn" onclick="window.storyApp.selectReaderLang('hindi')">இந்தி</button>
+      </div>
+
+      <!-- Auto Audio Player Toolbar -->
+      <div class="story-audio-toolbar">
+        <span class="audio-tb-label">🎧 முழுக் கதையையும் கேட்க:</span>
+        <select id="auto-audio-lang" class="select-input">
+          <option value="te-IN">தெலுங்கு (Telugu)</option>
+          <option value="kn-IN">கன்னடம் (Kannada)</option>
+          <option value="hi-IN">இந்தி (Hindi)</option>
+          <option value="en-US">ஆங்கிலம் (English)</option>
+          <option value="ta-IN">தமிழ் (Tamil)</option>
+        </select>
+        <button class="btn btn-sm btn-mark-read" id="btn-play-story" onclick="window.storyApp.playStoryAudio()">
+          ▶️ கதை கேட்க (Play)
+        </button>
+        <button class="btn btn-sm btn-outline" id="btn-stop-story" onclick="window.storyApp.stopStoryAudio()" style="display: none;">
+          ⏹️ நிறுத்து (Stop)
+        </button>
+      </div>
+    </div>
+
+    <!-- Stories Container -->
+    <div class="stories-wrapper" id="stories-wrapper">
+      <!-- Injected by js/stories.js -->
+    </div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="js/data/stories_data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/stories.js"></script>
+</body>
+</html>
