@@ -298,10 +298,12 @@ class BhashaAudio {
     }, 20);
   }
 
-  // --- Fallback Audio: Cloud Audio (Safely guarded against recursion) ---
+  // --- Primary Audio: Studio-Quality Natural Cloud Audio Engine (Google TTS) ---
+  // Crystal-clear native human pronunciation for Tamil, Telugu, Kannada, Hindi, and English
   playNaturalAudio(text, langShort, btnEl, onStart, onEnd, onFallback) {
     const sessionId = ++this.activeSessionId;
     let isTerminated = false;
+    let fallbackHandled = false;
 
     const chunks = this.splitIntoChunks(text, 160);
     if (chunks.length === 0) {
@@ -324,35 +326,54 @@ class BhashaAudio {
     audioB.playbackRate = this.speechRate;
     this.currentAudio = audioA;
 
+    // Safety watchdog: clear playing indicator if audio hangs or stalls indefinitely
+    const approxDurationMs = Math.max(3000, (text.length * 100) / this.speechRate);
+    if (this.watchdogTimer) clearTimeout(this.watchdogTimer);
+    this.watchdogTimer = setTimeout(() => {
+      cleanup();
+    }, approxDurationMs + 5000);
+
     const cleanup = () => {
       if (isTerminated || this.activeSessionId !== sessionId) return;
       isTerminated = true;
+
+      if (this.watchdogTimer) {
+        clearTimeout(this.watchdogTimer);
+        this.watchdogTimer = null;
+      }
 
       // CRITICAL: Remove all event handlers BEFORE touching .src to prevent recursive onerror events
       audioA.onerror = null;
       audioA.onended = null;
       audioA.oncanplay = null;
+      audioA.onplay = null;
       audioB.onerror = null;
       audioB.onended = null;
       audioB.oncanplay = null;
+      audioB.onplay = null;
 
       try {
         audioA.pause();
         audioA.removeAttribute('src');
         audioA.load();
+      } catch (e) {}
+
+      try {
         audioB.pause();
         audioB.removeAttribute('src');
         audioB.load();
       } catch (e) {}
 
-      this.currentAudio = null;
+      if (this.currentAudio === audioA || this.currentAudio === audioB) {
+        this.currentAudio = null;
+      }
       if (btnEl) btnEl.classList.remove('audio-playing');
       if (onEnd) onEnd();
     };
 
     const handleFailure = (err) => {
-      if (isTerminated || this.activeSessionId !== sessionId) return;
-      this.cloudTtsDisabled = true; // Mark as disabled to avoid repeated failed network requests
+      if (isTerminated || fallbackHandled || this.activeSessionId !== sessionId) return;
+      fallbackHandled = true;
       cleanup();
       if (onFallback) {
         onFallback();
@@ -382,6 +403,7 @@ class BhashaAudio {
         player.src = targetUrl;
       }
 
+      // Preload next chunk on alternate player for gapless playback
       if (index + 1 < chunks.length) {
         preloader.src = getUrl(chunks[index + 1]);
         try { preloader.load(); } catch (e) {}
@@ -396,9 +418,17 @@ class BhashaAudio {
         handleFailure(e);
       };
 
+      player.onplay = () => {
+        if (btnEl && !btnEl.classList.contains('audio-playing')) {
+          btnEl.classList.add('audio-playing');
+        }
+      };
+
       const playPromise = player.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
+          // If aborted because user clicked another button, do not treat as network failure
+          if (err && err.name === 'AbortError') return;
           handleFailure(err);
         });
       }
@@ -423,22 +453,20 @@ class BhashaAudio {
 
     const { short, full } = this.normalizeLang(langCode);
 
-    // 3. Primary: High-fidelity Native Web Speech API
-    if (this.synth) {
-      this.speakWebSpeech(text, full, phoneticFallback, btnEl, onStart, onEnd);
-      return;
-    }
-
-    // 4. Secondary: Cloud Audio (if SpeechSynthesis is absent from the browser)
-    if (!this.cloudTtsDisabled) {
-      this.playNaturalAudio(text, short, btnEl, onStart, onEnd, () => {
-        if (btnEl) btnEl.classList.remove('audio-playing');
-        if (onEnd) onEnd();
-      });
-    } else {
-      if (btnEl) btnEl.classList.remove('audio-playing');
-      if (onEnd) onEnd();
-    }
+    // 3. Primary: Studio-Quality Natural Audio (Google TTS)
+    // Produces authentic, human-sounding native studio voice for Tamil, Telugu, Kannada, Hindi, and English.
+    this.playNaturalAudio(
+      text,
+      short,
+      btnEl,
+      onStart,
+      onEnd,
+      () => {
+        // 4. Graceful Fallback: Web Speech API (only if offline or network unavailable)
+        console.warn('Natural studio audio failed or offline, falling back to Web Speech API');
+        this.speakWebSpeech(text, full, phoneticFallback, btnEl, onStart, onEnd);
+      }
+    );
   }
 
   stop() {
