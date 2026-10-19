@@ -1447,6 +1447,22 @@ body {
   background: rgba(255, 255, 255, 0.04);
   border-left: 3px solid rgba(6, 182, 212, 0.45);
 }
+
+.lightbox-content-box .lb-sentence.synced-highlight {
+  background: rgba(6, 182, 212, 0.12) !important;
+  border-color: transparent !important;
+  border-left: 3px solid #06b6d4 !important;
+  box-shadow: none !important;
+  border-radius: 0 6px 6px 0;
+}
+
+.lightbox-content-box .lb-sentence.synced-active-speaking {
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: transparent !important;
+  border-left: 3px solid #f59e0b !important;
+  box-shadow: none !important;
+  border-radius: 0 6px 6px 0;
+}
 .lightbox-content-box .speak-tamil-bold {
   font-family: var(--font-ta), 'Mukta Malar', 'Noto Sans Tamil', sans-serif;
   font-weight: 700;

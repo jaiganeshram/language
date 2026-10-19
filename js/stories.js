@@ -503,10 +503,6 @@ class StoriesApp {
 
           return `
           <div class="story-line-card" id="line-card-${line.lineNum}">
-            <div class="line-header-row">
-              <span class="line-num-badge">வரி ${line.lineNum} / 15</span>
-            </div>
-
             <!-- 5 Separate Language Panels Grid -->
             <div class="story-panels-grid">
               <!-- Panel 1: தமிழ் (Tamil) -->
