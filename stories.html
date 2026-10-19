@@ -77,6 +77,9 @@
       <a href="short_descriptions.html" class="page-nav-item">
         📝 சிறு விவரிப்புகள் (Short Descriptions)
       </a>
+      <a href="english.html" class="page-nav-item">
+        🇬🇧 ஆங்கிலக் கதைகள் (English Stories)
+      </a>
     </div>
   </nav>
 
@@ -150,6 +153,9 @@
         <button class="btn btn-sm btn-mark-read" id="btn-play-story" onclick="window.storyApp.playStoryAudio()">
           ▶️ கதை கேட்க (Play)
         </button>
+        <button class="btn btn-sm btn-outline story-bar-view-btn" id="btn-view-story-nav" onclick="window.storyApp.openSelectedLightbox()" title="தேர்வு செய்த கதையை ஒப்பிட்டுப் பார்க்க (Side-by-Side Lightbox View)" style="background: rgba(6, 182, 212, 0.12); color: #22d3ee; border-color: rgba(6, 182, 212, 0.35); font-weight: 700;">
+          👁️ View (ஒப்பீடு)
+        </button>
         <button class="btn btn-sm btn-outline" id="btn-stop-story" onclick="window.storyApp.stopStoryAudio()" style="display: none;">
           ⏹️ நிறுத்து (Stop)
         </button>
@@ -162,11 +168,99 @@
     </div>
   </main>
 
+  <!-- Story Comparison Lightbox Modal (Side-by-Side View with Combo Box) -->
+  <div class="story-lightbox-overlay" id="story-lightbox" style="display: none;" onclick="window.storyApp.closeLightbox(event)">
+    <div class="story-lightbox-container" onclick="event.stopPropagation()">
+      <!-- Lightbox Header (Ultra-Compact Single Row) -->
+      <div class="lightbox-header">
+        <div class="lightbox-title-wrap">
+          <span class="lightbox-icon" id="lb-icon">📚</span>
+          <h2 class="lightbox-title-ta" id="lb-title-ta">கதைத் தலைப்பு</h2>
+          <span class="lightbox-title-en" id="lb-title-en">Story Title English</span>
+          <span class="lightbox-badge" id="lb-badge">15 வரிகள்</span>
+        </div>
+        <div class="lightbox-header-actions">
+          <select id="lb-story-jump-select" class="lightbox-story-jump-select" onchange="window.storyApp.openLightbox(this.value)" title="வேறு கதையைத் தேர்வு செய்ய (Switch Story)">
+            <!-- Injected by js/stories.js -->
+          </select>
+          <button class="lightbox-close-btn" onclick="window.storyApp.closeLightbox()" title="மூடுக (Close - Esc)">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Lightbox Split Body: Left Tamil, Right Other Language with Combo Box -->
+      <div class="lightbox-split-body">
+        <!-- Left Panel: Fixed Tamil Content -->
+        <div class="lightbox-col lightbox-col-left">
+          <div class="lightbox-col-header">
+            <span class="slate-lang-badge badge-ta">🇮🇳 தமிழ் (Tamil)</span>
+            <button class="slate-audio-btn btn-ta" id="lb-btn-audio-ta" title="தமிழில் முழு கதையையும் கேட்க">
+              🔊 தமிழில் கேட்க
+            </button>
+          </div>
+          <div class="lightbox-content-box text-tamil" id="lb-content-tamil">
+            <!-- Injected by js/stories.js -->
+          </div>
+        </div>
+
+        <!-- Right Panel: Switchable Other Content via Combo Box -->
+        <div class="lightbox-col lightbox-col-right">
+          <div class="lightbox-col-header">
+            <select id="lb-lang-combo" class="lightbox-combo-select" onchange="window.storyApp.changeLightboxLang(this.value)" title="மொழியைத் தேர்வு செய்க">
+              <option value="english" selected>🇬🇧 English (ஆங்கிலம்)</option>
+              <option value="telugu">🗣️ தெலுங்கில் பேச (Telugu)</option>
+              <option value="kannada">🗣️ கன்னடத்தில் பேச (Kannada)</option>
+              <option value="hindi">🗣️ இந்தியில் பேச (Hindi)</option>
+            </select>
+            <button class="slate-audio-btn btn-en" id="lb-btn-audio-other" title="ஒலி கேட்க">
+              🔊 Listen English
+            </button>
+          </div>
+          <div class="lightbox-content-box" id="lb-content-other">
+            <!-- Injected by js/stories.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Lightbox Footer (Collapsible Summary & Vocab) -->
+      <div class="lightbox-footer-wrapper" id="lb-footer-wrapper">
+        <!-- Expandable Drawer for Summary & Vocab -->
+        <div class="lightbox-footer-drawer" id="lb-footer-drawer">
+          <div class="lightbox-vocab-summary" id="lb-vocab-summary">
+            <!-- Vocab & summary injected here -->
+          </div>
+        </div>
+
+        <!-- Sleek Single-Line Action Bar -->
+        <div class="lightbox-footer-bar">
+          <button class="btn btn-sm btn-outline lb-collapse-toggle-btn" id="lb-collapse-toggle-btn" onclick="window.storyApp.toggleLightboxFooter()" title="கலைச்சொற்கள் மற்றும் குறிப்புகளை சுருக்கு / காட்டு">
+            <span id="lb-collapse-icon">✨</span>
+            <span id="lb-collapse-text">கலைச்சொற்கள் &amp; குறிப்பு (Vocab) ▲</span>
+          </button>
+
+          <div class="lightbox-footer-controls">
+            <button class="btn btn-sm btn-outline lb-nav-btn" id="lb-prev-btn" onclick="window.storyApp.navigateLightbox(-1)" title="முந்தைய கதை">
+              ◀ முந்தையது (Prev)
+            </button>
+            <button class="btn btn-sm btn-outline lb-nav-btn" id="lb-next-btn" onclick="window.storyApp.navigateLightbox(1)" title="அடுத்தது (Next)">
+              அடுத்தது (Next) ▶
+            </button>
+            <button class="btn btn-sm btn-outline lb-close-action" onclick="window.storyApp.closeLightbox()">
+              மூடு (Close)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <!-- Scripts -->
   <script src="js/data/stories_data.js"></script>
+  <script src="js/data/vocab_dictionary.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/stories.js"></script>
 </body>

@@ -77,6 +77,9 @@
       <a href="short_descriptions.html" class="page-nav-item">
         📝 சிறு விவரிப்புகள் (Short Descriptions)
       </a>
+      <a href="english.html" class="page-nav-item">
+        🇬🇧 ஆங்கிலக் கதைகள் (English Stories)
+      </a>
     </div>
   </nav>
 
@@ -118,8 +121,28 @@
         <label for="story-select-dropdown" class="story-dropdown-label">
           📖 குறிப்பிட்ட கதையைத் தேர்வு செய்ய (Jump to Story):
         </label>
-        <div class="story-select-wrapper">
-          <select id="story-select-dropdown" class="story-dropdown-select" onchange="window.dailyApp.filterStory(this.value)">
+        <div class="story-select-wrapper" id="story-custom-select-wrapper">
+          <button type="button" class="story-custom-trigger" id="story-custom-trigger" aria-haspopup="listbox" aria-expanded="false" title="கதையைத் தேர்வு செய்ய கிளிக் செய்யவும்">
+            <span class="custom-trigger-text" id="story-custom-label">📌 எல்லாக் கதைகளையும் தொடர்ச்சியாகக் காட்டு (All Stories)</span>
+            <span class="custom-trigger-arrow" id="story-custom-arrow">▾</span>
+          </button>
+
+          <div class="story-custom-menu" id="story-custom-menu" style="display: none;" role="listbox">
+            <div class="custom-menu-search-wrap">
+              <span class="custom-menu-search-icon">🔍</span>
+              <input type="text" id="story-custom-search-input" class="custom-menu-search-input" placeholder="கதை எண் அல்லது தலைப்பைத் தேடுக... (Type to search)" autocomplete="off">
+              <button type="button" id="story-custom-search-clear" class="custom-menu-search-clear" style="display: none;" title="அழி">✕</button>
+            </div>
+            <div class="custom-menu-list" id="story-custom-list">
+              <!-- Rendered dynamically with prominent always-visible scrollbar -->
+            </div>
+            <div class="custom-menu-footer">
+              <span id="story-custom-count-badge">மொத்தம் 120 கதைகள்</span>
+              <span class="custom-menu-scroll-hint">↕ ஸ்க்ரோல் பார் மூலம் உருட்டலாம்</span>
+            </div>
+          </div>
+
+          <select id="story-select-dropdown" class="story-dropdown-select" style="display: none;" onchange="window.dailyApp.filterStory(this.value)">
             <!-- Injected by js/daily_reading.js -->
           </select>
         </div>
@@ -256,6 +279,7 @@
 
   <!-- Scripts -->
   <script src="js/data/daily_reading_data.js"></script>
+  <script src="js/data/vocab_dictionary.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/daily_reading.js"></script>
 </body>

@@ -30,6 +30,9 @@ class ShortDescriptionsApp {
     this.currentLightboxLang = 'english';
     this.isLightboxFooterCollapsed = true; // default collapsed to maximize vertical reading space
 
+    // Custom dropdown state
+    this.isCustomDropdownOpen = false;
+
     this.categories = [
       { id: 'all', label: '📌 அனைத்தும் (All Descriptions)' },
       { id: 'nature', label: '🌿 இயற்கை காட்சிகள் (Nature)' },
@@ -85,10 +88,61 @@ class ShortDescriptionsApp {
       });
     }
 
-    // Keyboard Escape key to close lightbox
+    // Custom Story Dropdown Trigger Click
+    const customTrigger = document.getElementById('story-custom-trigger');
+    if (customTrigger) {
+      customTrigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleCustomStoryDropdown();
+      });
+    }
+
+    // Custom Dropdown Search Input
+    const customSearchInput = document.getElementById('story-custom-search-input');
+    if (customSearchInput) {
+      customSearchInput.addEventListener('input', (e) => {
+        this.filterCustomStorySearch(e.target.value);
+      });
+      customSearchInput.addEventListener('click', (e) => e.stopPropagation());
+      customSearchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          this.closeCustomStoryDropdown();
+        }
+      });
+    }
+
+    // Custom Dropdown Clear Button
+    const customSearchClear = document.getElementById('story-custom-search-clear');
+    if (customSearchClear) {
+      customSearchClear.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (customSearchInput) {
+          customSearchInput.value = '';
+          this.filterCustomStorySearch('');
+          customSearchInput.focus();
+        }
+      });
+    }
+
+    // Prevent clicks inside menu from bubbling to document
+    const customMenu = document.getElementById('story-custom-menu');
+    if (customMenu) {
+      customMenu.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    // Close Custom Dropdown on Outside Click
+    document.addEventListener('click', () => {
+      this.closeCustomStoryDropdown();
+    });
+
+    // Keyboard Escape key to close lightbox & custom dropdown
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && this.isLightboxOpen) {
-        this.closeLightbox();
+      if (e.key === 'Escape') {
+        if (this.isCustomDropdownOpen) {
+          this.closeCustomStoryDropdown();
+        } else if (this.isLightboxOpen) {
+          this.closeLightbox();
+        }
       }
     });
   }
@@ -117,25 +171,86 @@ class ShortDescriptionsApp {
 
   renderStorySelector() {
     const selectEl = document.getElementById('story-select-dropdown');
-    if (!selectEl) return;
-
     let availableStories = SHORT_DESCRIPTIONS_DATA;
     if (this.selectedCategory !== 'all') {
       availableStories = availableStories.filter(s => s.category === this.selectedCategory);
     }
 
-    const options = [
-      `<option value="all" ${this.selectedStory === 'all' ? 'selected' : ''}>📌 எல்லா விவரிப்புகளையும் தொடர்ச்சியாகக் காட்டு (All ${availableStories.length} Items)</option>`,
-      ...availableStories.map((s, idx) => {
-        const isSelected = this.selectedStory === s.id ? 'selected' : '';
+    // 1. Update native <select> for backward compatibility
+    if (selectEl) {
+      const options = [
+        `<option value="all" ${this.selectedStory === 'all' ? 'selected' : ''}>📌 எல்லா விவரிப்புகளையும் தொடர்ச்சியாகக் காட்டு (All ${availableStories.length} Items)</option>`,
+        ...availableStories.map((s, idx) => {
+          const isSelected = this.selectedStory === s.id ? 'selected' : '';
+          const titleTa = s.titleTamil || s.title;
+          const titleEn = s.titleEnglish || s.titleEn;
+          return `<option value="${s.id}" ${isSelected}>${idx + 1}. ${s.icon || '📝'} ${titleTa} (${titleEn})</option>`;
+        })
+      ];
+      selectEl.innerHTML = options.join('');
+      selectEl.value = this.selectedStory;
+    }
+
+    // 2. Update Custom Dropdown Label & Icon
+    const customLabel = document.getElementById('story-custom-label');
+    if (customLabel) {
+      if (this.selectedStory === 'all') {
+        customLabel.textContent = `📌 அனைத்து விவரிப்புகளையும் தொடர்ச்சியாகக் காட்டு (All ${availableStories.length} Items)`;
+      } else {
+        const selStory = availableStories.find(s => s.id === this.selectedStory) || SHORT_DESCRIPTIONS_DATA.find(s => s.id === this.selectedStory);
+        if (selStory) {
+          const titleTa = selStory.titleTamil || selStory.title;
+          const titleEn = selStory.titleEnglish || selStory.titleEn;
+          const storyIndex = availableStories.findIndex(s => s.id === this.selectedStory);
+          const numPrefix = storyIndex >= 0 ? `${storyIndex + 1}. ` : '';
+          customLabel.textContent = `${numPrefix}${selStory.icon || '📝'} ${titleTa} (${titleEn})`;
+        } else {
+          customLabel.textContent = `📌 அனைத்து விவரிப்புகளையும் தொடர்ச்சியாகக் காட்டு (All ${availableStories.length} Items)`;
+        }
+      }
+    }
+
+    // 3. Render Custom Dropdown Items (with ALWAYS visible prominent scrollbar)
+    const listEl = document.getElementById('story-custom-list');
+    if (listEl) {
+      const isAllActive = this.selectedStory === 'all';
+      const allItemHtml = `
+        <div class="custom-menu-item ${isAllActive ? 'active' : ''}" data-value="all" data-search="all அனைத்தும் எல்லா" onclick="window.shortDescApp.selectCustomStory('all')">
+          <span class="item-badge-all">📌</span>
+          <div class="item-text-group">
+            <div class="item-title-ta">அனைத்து விவரிப்புகளையும் தொடர்ச்சியாகக் காட்டு</div>
+            <div class="item-title-en">Show all ${availableStories.length} items continuously</div>
+          </div>
+          ${isAllActive ? '<span class="item-check">✓</span>' : ''}
+        </div>
+      `;
+
+      const storyItemsHtml = availableStories.map((s, idx) => {
+        const isActive = this.selectedStory === s.id;
         const titleTa = s.titleTamil || s.title;
         const titleEn = s.titleEnglish || s.titleEn;
-        return `<option value="${s.id}" ${isSelected}>${idx + 1}. ${s.icon || '📝'} ${titleTa} (${titleEn})</option>`;
-      })
-    ];
+        const searchText = `${idx + 1} ${(titleTa || '').toLowerCase()} ${(titleEn || '').toLowerCase()}`;
+        return `
+          <div class="custom-menu-item ${isActive ? 'active' : ''}" data-value="${s.id}" data-search="${searchText}" onclick="window.shortDescApp.selectCustomStory(${s.id})">
+            <span class="item-num-badge">${idx + 1}</span>
+            <span class="item-icon">${s.icon || '📝'}</span>
+            <div class="item-text-group">
+              <div class="item-title-ta">${titleTa}</div>
+              <div class="item-title-en">${titleEn || ''}</div>
+            </div>
+            ${isActive ? '<span class="item-check">✓</span>' : ''}
+          </div>
+        `;
+      }).join('');
 
-    selectEl.innerHTML = options.join('');
-    selectEl.value = this.selectedStory;
+      listEl.innerHTML = allItemHtml + storyItemsHtml;
+    }
+
+    // 4. Update Footer Count Badge
+    const countBadge = document.getElementById('story-custom-count-badge');
+    if (countBadge) {
+      countBadge.textContent = `மொத்தம் ${availableStories.length} விவரிப்புகள்`;
+    }
 
     const btnAll = document.getElementById('btn-all-stories');
     if (btnAll) {
@@ -152,6 +267,100 @@ class ShortDescriptionsApp {
       } else {
         btnViewNav.innerHTML = '👁️ View (ஒப்பீடு)';
         btnViewNav.title = 'முதல் விவரிப்பை ஒப்பிட்டுப் பார்க்க (Side-by-Side Lightbox View)';
+      }
+    }
+  }
+
+  toggleCustomStoryDropdown() {
+    if (this.isCustomDropdownOpen) {
+      this.closeCustomStoryDropdown();
+    } else {
+      this.openCustomStoryDropdown();
+    }
+  }
+
+  openCustomStoryDropdown() {
+    const menu = document.getElementById('story-custom-menu');
+    const arrow = document.getElementById('story-custom-arrow');
+    const trigger = document.getElementById('story-custom-trigger');
+    const searchInput = document.getElementById('story-custom-search-input');
+    const searchClear = document.getElementById('story-custom-search-clear');
+    if (!menu) return;
+
+    this.isCustomDropdownOpen = true;
+    menu.style.display = 'flex';
+    if (arrow) arrow.classList.add('open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'true');
+
+    // Reset search
+    if (searchInput) {
+      searchInput.value = '';
+      if (searchClear) searchClear.style.display = 'none';
+      this.filterCustomStorySearch('');
+      setTimeout(() => searchInput.focus(), 50);
+    }
+
+    // Automatically scroll to active item so user sees current position immediately
+    setTimeout(() => {
+      const activeItem = menu.querySelector('.custom-menu-item.active');
+      if (activeItem) {
+        activeItem.scrollIntoView({ block: 'nearest', behavior: 'auto' });
+      }
+    }, 60);
+
+    window.bhashaAudio.playSfx('click');
+  }
+
+  closeCustomStoryDropdown() {
+    const menu = document.getElementById('story-custom-menu');
+    const arrow = document.getElementById('story-custom-arrow');
+    const trigger = document.getElementById('story-custom-trigger');
+    if (!menu) return;
+
+    this.isCustomDropdownOpen = false;
+    menu.style.display = 'none';
+    if (arrow) arrow.classList.remove('open');
+    if (trigger) trigger.setAttribute('aria-expanded', 'false');
+  }
+
+  selectCustomStory(storyId) {
+    this.closeCustomStoryDropdown();
+    this.filterStory(storyId);
+  }
+
+  filterCustomStorySearch(query) {
+    const q = (query || '').toLowerCase().trim();
+    const listEl = document.getElementById('story-custom-list');
+    const searchClear = document.getElementById('story-custom-search-clear');
+    const countBadge = document.getElementById('story-custom-count-badge');
+    if (!listEl) return;
+
+    if (searchClear) {
+      searchClear.style.display = q ? 'flex' : 'none';
+    }
+
+    const items = listEl.querySelectorAll('.custom-menu-item');
+    let matchCount = 0;
+    items.forEach(item => {
+      const searchData = item.getAttribute('data-search') || '';
+      const isAll = item.getAttribute('data-value') === 'all';
+      if (!q || isAll || searchData.includes(q)) {
+        item.style.display = 'flex';
+        if (!isAll) matchCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    if (countBadge) {
+      if (q) {
+        countBadge.textContent = `${matchCount} விவரிப்புகள் பொருந்துகின்றன`;
+      } else {
+        let availableStories = SHORT_DESCRIPTIONS_DATA;
+        if (this.selectedCategory !== 'all') {
+          availableStories = availableStories.filter(s => s.category === this.selectedCategory);
+        }
+        countBadge.textContent = `மொத்தம் ${availableStories.length} விவரிப்புகள்`;
       }
     }
   }
@@ -632,6 +841,10 @@ class ShortDescriptionsApp {
     const titleTa = story.titleTamil || story.title;
     const titleEn = story.titleEnglish || story.titleEn;
 
+    this.currentLightboxStoryId = storyId;
+    this.isLightboxOpen = true;
+    this.stopSequentialLightboxAudio();
+
     // Header info
     const iconEl = document.getElementById('lb-icon');
     const titleTaEl = document.getElementById('lb-title-ta');
@@ -652,56 +865,50 @@ class ShortDescriptionsApp {
       jumpSelect.value = storyId;
     }
 
-    // Left Column: Tamil Content
+    // Left Column: Line-by-Line Tamil Content
     const tamilBox = document.getElementById('lb-content-tamil');
-    if (tamilBox) tamilBox.innerHTML = `<div class="text-tamil-body">${(story.fullTamil || '').trim()}</div>`;
-
-    // Left Tamil Audio Button
-    const btnTa = document.getElementById('lb-btn-audio-ta');
-    if (btnTa) {
-      btnTa.onclick = () => {
-        this.speak(story.fullTamil, 'ta-IN', story.fullTamil, btnTa);
-      };
-    }
-
-    // Vocab & Tagline Footer Drawer
-    const vocabBox = document.getElementById('lb-vocab-summary');
-    if (vocabBox) {
-      let vocabHtml = '';
-      if (story.vocabulary && story.vocabulary.length) {
-        vocabHtml = `
-          <div class="lb-vocab-text">
-            ✨ <strong style="color: #f59e0b;">கலைச்சொற்கள் & பல மொழி உச்சரிப்பு (Multilingual Vocabulary):</strong>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.4rem;">
-              ${story.vocabulary.map(v => {
-                const en = v.english && v.english !== v.tamil ? ` (${v.english})` : '';
-                const te = v.telugu && v.telugu !== v.tamil ? ` • தெ: ${v.telugu}` : '';
-                const kn = v.kannada && v.kannada !== v.tamil ? ` • க: ${v.kannada}` : '';
-                const hi = v.hindi && v.hindi !== v.tamil ? ` • இ: ${v.hindi}` : '';
-                return `
-                <div class="vocab-tag" style="background: rgba(245, 158, 11, 0.12); border-color: rgba(245, 158, 11, 0.35); color: #fbbf24; font-size: 0.82rem; padding: 0.3rem 0.6rem; border-radius: 6px;">
-                  <strong style="color: #fff;">${v.tamil || v}</strong>${en}${te}${kn}${hi}
-                </div>`;
-              }).join('')}
+    const taLines = this.splitSentences(story.fullTamil);
+    if (tamilBox) {
+      tamilBox.innerHTML = `
+        <div class="text-tamil-body">
+          ${taLines.map((line, idx) => `
+            <div class="lb-sentence sentence-ta" data-line-index="${idx}" title="Click to listen line in Tamil">
+              <div style="display: flex; align-items: baseline;">
+                <span class="line-num-badge">${idx + 1}</span>
+                <span class="sentence-ta-text">${this.escapeHtml(line)}</span>
+              </div>
             </div>
-          </div>
-        `;
-      }
-      vocabBox.innerHTML = `
-        ${story.tagline ? `<div class="lb-summary-text" style="margin-bottom: 0.4rem;">💡 <strong>விவரம்:</strong> ${story.tagline}</div>` : ''}
-        ${vocabHtml}
+          `).join('')}
+        </div>
       `;
     }
 
-    // Sync Footer Collapse state
-    this.updateLightboxFooterState();
+    // Left Tamil Audio Button (Sequential Story Audio)
+    const btnTa = document.getElementById('lb-btn-audio-ta');
+    if (btnTa) {
+      btnTa.classList.remove('active-speaking');
+      btnTa.innerHTML = '🔊 தமிழில் கேட்க';
+      btnTa.onclick = () => {
+        if (this.isLightboxPlaying && this.lightboxPlayLang === 'ta-IN') {
+          this.stopSequentialLightboxAudio();
+        } else {
+          this.playSequentialLightboxAudio('ta-IN');
+        }
+      };
+    }
 
     // Set combo box to current selection
     const combo = document.getElementById('lb-lang-combo');
     if (combo) combo.value = this.currentLightboxLang;
 
-    // Update Right Column Content
+    // Update Right Column Content (Line-by-Line with phonetics)
     this.updateLightboxOtherContent();
+
+    // Populate Vocab & Tagline Footer Drawer
+    this.updateLightboxFooterContent();
+
+    // Sync Footer Collapse state
+    this.updateLightboxFooterState();
 
     // Show modal & prevent background scrolling
     const modal = document.getElementById('story-lightbox');
@@ -713,8 +920,29 @@ class ShortDescriptionsApp {
     window.bhashaAudio.playSfx('click');
   }
 
+  escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  escapeAudio(str) {
+    if (!str) return '';
+    return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  splitSentences(text) {
+    if (!text) return [];
+    return text.split(/(?<=[.?!])\s+/).map(s => s.trim()).filter(Boolean);
+  }
+
   changeLightboxLang(lang) {
     this.currentLightboxLang = lang;
+    this.stopSequentialLightboxAudio();
     this.updateLightboxOtherContent();
     window.bhashaAudio.playSfx('click');
   }
@@ -728,39 +956,387 @@ class ShortDescriptionsApp {
     if (!contentBox || !audioBtn) return;
 
     audioBtn.className = 'slate-audio-btn';
+    let targetLangCode = 'en-US';
 
     if (this.currentLightboxLang === 'english') {
-      contentBox.innerHTML = `<div class="text-english-body">${(story.fullEnglish || '').trim()}</div>`;
+      const enLines = this.splitSentences(story.fullEnglish);
+      contentBox.innerHTML = `
+        <div class="text-english-body">
+          ${enLines.map((line, idx) => `
+            <div class="lb-sentence sentence-en" data-line-index="${idx}" title="Click to listen line in English">
+              <div style="display: flex; align-items: baseline;">
+                <span class="line-num-badge">${idx + 1}</span>
+                <div class="english-line-text">${this.escapeHtml(line)}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
       audioBtn.classList.add('btn-en');
       audioBtn.innerHTML = '🔊 Listen English';
-      audioBtn.onclick = () => {
-        this.speak(story.fullEnglish, 'en-US', story.fullEnglish, audioBtn);
-      };
+      targetLangCode = 'en-US';
     } else if (this.currentLightboxLang === 'telugu') {
-      contentBox.innerHTML = `<div class="speak-tamil-bold">${(story.fullTeluguSpeak || '').trim()}</div>` +
-        (story.fullTeluguSub ? `<div class="speak-en-sub">${(story.fullTeluguSub || '').trim()}</div>` : '');
+      const teSpeak = this.splitSentences(story.fullTeluguSpeak);
+      const teSub = this.splitSentences(story.fullTeluguSub);
+      contentBox.innerHTML = `
+        <div class="text-telugu-body">
+          ${teSpeak.map((speak, idx) => {
+            const sub = teSub[idx] || '';
+            return `
+              <div class="lb-sentence sentence-te" data-line-index="${idx}" title="Click to listen line in Telugu">
+                <div style="display: flex; align-items: baseline;">
+                  <span class="line-num-badge">${idx + 1}</span>
+                  <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
+                </div>
+                ${sub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(sub)})</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
       audioBtn.classList.add('btn-te');
-      audioBtn.innerHTML = '🔊 தெலுங்கு ஒலி';
-      audioBtn.onclick = () => {
-        this.speak(story.fullTeluguScript || story.fullTeluguSpeak, 'te-IN', story.fullTeluguSub || story.fullTeluguSpeak, audioBtn);
-      };
+      audioBtn.innerHTML = '🔊 தெலுங்கு ஒலி (Listen Telugu)';
+      targetLangCode = 'te-IN';
     } else if (this.currentLightboxLang === 'kannada') {
-      contentBox.innerHTML = `<div class="speak-tamil-bold">${(story.fullKannadaSpeak || '').trim()}</div>` +
-        (story.fullKannadaSub ? `<div class="speak-en-sub">${(story.fullKannadaSub || '').trim()}</div>` : '');
+      const knSpeak = this.splitSentences(story.fullKannadaSpeak);
+      const knSub = this.splitSentences(story.fullKannadaSub);
+      contentBox.innerHTML = `
+        <div class="text-kannada-body">
+          ${knSpeak.map((speak, idx) => {
+            const sub = knSub[idx] || '';
+            return `
+              <div class="lb-sentence sentence-kn" data-line-index="${idx}" title="Click to listen line in Kannada">
+                <div style="display: flex; align-items: baseline;">
+                  <span class="line-num-badge">${idx + 1}</span>
+                  <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
+                </div>
+                ${sub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(sub)})</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
       audioBtn.classList.add('btn-kn');
-      audioBtn.innerHTML = '🔊 கன்னட ஒலி';
-      audioBtn.onclick = () => {
-        this.speak(story.fullKannadaScript || story.fullKannadaSpeak, 'kn-IN', story.fullKannadaSub || story.fullKannadaSpeak, audioBtn);
-      };
+      audioBtn.innerHTML = '🔊 கன்னட ஒலி (Listen Kannada)';
+      targetLangCode = 'kn-IN';
     } else if (this.currentLightboxLang === 'hindi') {
-      contentBox.innerHTML = `<div class="speak-tamil-bold">${(story.fullHindiSpeak || '').trim()}</div>` +
-        (story.fullHindiSub ? `<div class="speak-en-sub">${(story.fullHindiSub || '').trim()}</div>` : '');
+      const hiSpeak = this.splitSentences(story.fullHindiSpeak);
+      const hiSub = this.splitSentences(story.fullHindiSub);
+      contentBox.innerHTML = `
+        <div class="text-hindi-body">
+          ${hiSpeak.map((speak, idx) => {
+            const sub = hiSub[idx] || '';
+            return `
+              <div class="lb-sentence sentence-hi" data-line-index="${idx}" title="Click to listen line in Hindi">
+                <div style="display: flex; align-items: baseline;">
+                  <span class="line-num-badge">${idx + 1}</span>
+                  <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
+                </div>
+                ${sub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(sub)})</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
       audioBtn.classList.add('btn-hi');
-      audioBtn.innerHTML = '🔊 இந்தி ஒலி';
-      audioBtn.onclick = () => {
-        this.speak(story.fullHindiScript || story.fullHindiSpeak, 'hi-IN', story.fullHindiSub || story.fullHindiSpeak, audioBtn);
-      };
+      audioBtn.innerHTML = '🔊 இந்தி ஒலி (Listen Hindi)';
+      targetLangCode = 'hi-IN';
     }
+
+    audioBtn.onclick = () => {
+      if (this.isLightboxPlaying && this.lightboxPlayLang === targetLangCode) {
+        this.stopSequentialLightboxAudio();
+      } else {
+        this.playSequentialLightboxAudio(targetLangCode);
+      }
+    };
+
+    // Attach sentence click & hover sync
+    this.attachLightboxSentenceInteractions();
+
+    // Re-render vocab drawer to match target language
+    this.updateLightboxFooterContent();
+  }
+
+  attachLightboxSentenceInteractions() {
+    const modal = document.getElementById('story-lightbox');
+    if (!modal) return;
+
+    const sentences = modal.querySelectorAll('.lb-sentence');
+    sentences.forEach((span) => {
+      const idx = span.getAttribute('data-line-index');
+
+      span.onmouseenter = () => {
+        modal.querySelectorAll(`.lb-sentence[data-line-index="${idx}"]`).forEach((s) => {
+          s.classList.add('synced-highlight');
+        });
+      };
+
+      span.onmouseleave = () => {
+        modal.querySelectorAll(`.lb-sentence[data-line-index="${idx}"]`).forEach((s) => {
+          s.classList.remove('synced-highlight');
+        });
+      };
+
+      span.onclick = (e) => {
+        e.stopPropagation();
+        const lineIdx = parseInt(idx, 10);
+        const isLeft = span.closest('.lightbox-col-left') !== null;
+        if (isLeft) {
+          this.speakSingleLightboxLine(lineIdx, 'tamil');
+        } else {
+          this.speakSingleLightboxLine(lineIdx, this.currentLightboxLang);
+        }
+      };
+    });
+  }
+
+  speakSingleLightboxLine(lineIdx, lang) {
+    const story = SHORT_DESCRIPTIONS_DATA.find(s => s.id === this.currentLightboxStoryId);
+    if (!story) return;
+
+    this.stopSequentialLightboxAudio();
+
+    const modal = document.getElementById('story-lightbox');
+    if (modal) {
+      modal.querySelectorAll('.lb-sentence').forEach(s => s.classList.remove('synced-active-speaking'));
+      modal.querySelectorAll(`.lb-sentence[data-line-index="${lineIdx}"]`).forEach(s => s.classList.add('synced-active-speaking'));
+    }
+
+    let text = '';
+    let langCode = 'ta-IN';
+    let subFallback = '';
+
+    if (lang === 'tamil') {
+      const lines = this.splitSentences(story.fullTamil);
+      text = lines[lineIdx] || '';
+      langCode = 'ta-IN';
+      subFallback = text;
+    } else if (lang === 'english') {
+      const lines = this.splitSentences(story.fullEnglish);
+      text = lines[lineIdx] || '';
+      langCode = 'en-US';
+      subFallback = text;
+    } else if (lang === 'telugu') {
+      const scripts = this.splitSentences(story.fullTeluguScript);
+      const speaks = this.splitSentences(story.fullTeluguSpeak);
+      const subs = this.splitSentences(story.fullTeluguSub);
+      text = scripts[lineIdx] || speaks[lineIdx] || '';
+      subFallback = subs[lineIdx] || speaks[lineIdx] || '';
+      langCode = 'te-IN';
+    } else if (lang === 'kannada') {
+      const scripts = this.splitSentences(story.fullKannadaScript);
+      const speaks = this.splitSentences(story.fullKannadaSpeak);
+      const subs = this.splitSentences(story.fullKannadaSub);
+      text = scripts[lineIdx] || speaks[lineIdx] || '';
+      subFallback = subs[lineIdx] || speaks[lineIdx] || '';
+      langCode = 'kn-IN';
+    } else if (lang === 'hindi') {
+      const scripts = this.splitSentences(story.fullHindiScript);
+      const speaks = this.splitSentences(story.fullHindiSpeak);
+      const subs = this.splitSentences(story.fullHindiSub);
+      text = scripts[lineIdx] || speaks[lineIdx] || '';
+      subFallback = subs[lineIdx] || speaks[lineIdx] || '';
+      langCode = 'hi-IN';
+    }
+
+    if (text) {
+      this.speak(text, langCode, subFallback);
+      const durationMs = Math.max(2200, (text.length * 80) / this.audioSpeed);
+      setTimeout(() => {
+        if (modal) {
+          modal.querySelectorAll(`.lb-sentence[data-line-index="${lineIdx}"]`).forEach(s => s.classList.remove('synced-active-speaking'));
+        }
+      }, durationMs);
+    }
+  }
+
+  playSequentialLightboxAudio(targetLang) {
+    const story = SHORT_DESCRIPTIONS_DATA.find(s => s.id === this.currentLightboxStoryId);
+    if (!story) return;
+
+    this.stopSequentialLightboxAudio();
+    this.isLightboxPlaying = true;
+    this.lightboxPlayLang = targetLang;
+    this.lightboxPlayIndex = 0;
+
+    let lines = [];
+    let subs = [];
+
+    if (targetLang === 'ta-IN') {
+      lines = this.splitSentences(story.fullTamil);
+      subs = lines;
+    } else if (targetLang === 'en-US') {
+      lines = this.splitSentences(story.fullEnglish);
+      subs = lines;
+    } else if (targetLang === 'te-IN') {
+      lines = this.splitSentences(story.fullTeluguScript || story.fullTeluguSpeak);
+      subs = this.splitSentences(story.fullTeluguSub || story.fullTeluguSpeak);
+    } else if (targetLang === 'kn-IN') {
+      lines = this.splitSentences(story.fullKannadaScript || story.fullKannadaSpeak);
+      subs = this.splitSentences(story.fullKannadaSub || story.fullKannadaSpeak);
+    } else if (targetLang === 'hi-IN') {
+      lines = this.splitSentences(story.fullHindiScript || story.fullHindiSpeak);
+      subs = this.splitSentences(story.fullHindiSub || story.fullHindiSpeak);
+    }
+
+    this.lightboxPlayLines = lines;
+    this.lightboxPlaySubs = subs;
+
+    // Toggle button state
+    const btn = targetLang === 'ta-IN' ? document.getElementById('lb-btn-audio-ta') : document.getElementById('lb-btn-audio-other');
+    if (btn) {
+      btn.classList.add('active-speaking');
+      btn.dataset.prevHtml = btn.innerHTML;
+      btn.innerHTML = '⏹️ நிறுத்து (Stop)';
+    }
+
+    this.playNextLightboxLine();
+  }
+
+  playNextLightboxLine() {
+    if (!this.isLightboxPlaying || this.lightboxPlayIndex >= this.lightboxPlayLines.length) {
+      this.stopSequentialLightboxAudio();
+      this.showToast('🎉 வாசிப்பு ஒலி நிறைவடைந்தது!');
+      return;
+    }
+
+    const idx = this.lightboxPlayIndex;
+    const text = this.lightboxPlayLines[idx];
+    const sub = this.lightboxPlaySubs[idx] || text;
+    const modal = document.getElementById('story-lightbox');
+
+    if (modal) {
+      modal.querySelectorAll('.lb-sentence').forEach(s => s.classList.remove('synced-active-speaking'));
+      const activeCards = modal.querySelectorAll(`.lb-sentence[data-line-index="${idx}"]`);
+      activeCards.forEach(s => s.classList.add('synced-active-speaking'));
+      if (activeCards[0]) {
+        activeCards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    this.speak(text, this.lightboxPlayLang, sub);
+
+    const durationMs = Math.max(2600, (text.length * 85) / this.audioSpeed);
+    this.lightboxPlayTimeout = setTimeout(() => {
+      this.lightboxPlayIndex++;
+      this.playNextLightboxLine();
+    }, durationMs);
+  }
+
+  stopSequentialLightboxAudio() {
+    this.isLightboxPlaying = false;
+    if (this.lightboxPlayTimeout) {
+      clearTimeout(this.lightboxPlayTimeout);
+      this.lightboxPlayTimeout = null;
+    }
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+
+    const modal = document.getElementById('story-lightbox');
+    if (modal) {
+      modal.querySelectorAll('.lb-sentence').forEach(s => s.classList.remove('synced-active-speaking'));
+    }
+
+    const btnTa = document.getElementById('lb-btn-audio-ta');
+    if (btnTa) {
+      btnTa.classList.remove('active-speaking');
+      btnTa.innerHTML = '🔊 தமிழில் கேட்க';
+    }
+
+    const btnOther = document.getElementById('lb-btn-audio-other');
+    if (btnOther) {
+      btnOther.classList.remove('active-speaking');
+      if (this.currentLightboxLang === 'english') btnOther.innerHTML = '🔊 Listen English';
+      else if (this.currentLightboxLang === 'telugu') btnOther.innerHTML = '🔊 தெலுங்கு ஒலி (Listen Telugu)';
+      else if (this.currentLightboxLang === 'kannada') btnOther.innerHTML = '🔊 கன்னட ஒலி (Listen Kannada)';
+      else if (this.currentLightboxLang === 'hindi') btnOther.innerHTML = '🔊 இந்தி ஒலி (Listen Hindi)';
+    }
+  }
+
+  updateLightboxFooterContent() {
+    const story = SHORT_DESCRIPTIONS_DATA.find(s => s.id === this.currentLightboxStoryId);
+    const vocabBox = document.getElementById('lb-vocab-summary');
+    if (!story || !vocabBox) return;
+
+    const rawVocab = story.vocab || story.vocabulary || [];
+    const items = window.getVocabComparison 
+      ? window.getVocabComparison(rawVocab, story.id)
+      : [];
+
+    let langHeaderTitle = 'ஆங்கில சொல்லகராதி (English Vocab)';
+    let langColHeader = 'ஆங்கிலம்';
+    let langSpeakKey = 'english';
+    let langColor = '#38bdf8';
+
+    if (this.currentLightboxLang === 'telugu') {
+      langHeaderTitle = 'தெலுங்கு சொல்லகராதி (Telugu Vocab in Tamil)';
+      langColHeader = '🗣️ தெலுங்கு (தமிழில் உச்சரிப்பு)';
+      langSpeakKey = 'teluguSpeak';
+      langColor = '#38bdf8';
+    } else if (this.currentLightboxLang === 'kannada') {
+      langHeaderTitle = 'கன்னட சொல்லகராதி (Kannada Vocab in Tamil)';
+      langColHeader = '🗣️ கன்னடம் (தமிழில் உச்சரிப்பு)';
+      langSpeakKey = 'kannadaSpeak';
+      langColor = '#fb923c';
+    } else if (this.currentLightboxLang === 'hindi') {
+      langHeaderTitle = 'இந்தி சொல்லகராதி (Hindi Vocab in Tamil)';
+      langColHeader = '🗣️ இந்தி (தமிழில் உச்சரிப்பு)';
+      langSpeakKey = 'hindiSpeak';
+      langColor = '#c084fc';
+    }
+
+    let vocabTableHtml = '';
+    if (items.length > 0) {
+      vocabTableHtml = `
+        <div class="lb-vocab-table-wrap">
+          <div style="font-size: 0.82rem; font-weight: 700; color: #fbbf24; margin-bottom: 0.45rem; display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0.5rem 0;">
+            <span>✨ ${langHeaderTitle}:</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 500;">கலைச்சொற்கள் & பல மொழி உச்சரிப்பு</span>
+          </div>
+          <table class="lb-vocab-mini-table">
+            <thead>
+              <tr>
+                <th style="min-width: 130px;">ஆங்கில சொல் (English)</th>
+                <th style="min-width: 140px;">தமிழ் அர்த்தம் (Meaning)</th>
+                ${this.currentLightboxLang !== 'english' ? `<th style="min-width: 160px;">${langColHeader}</th>` : ''}
+                <th style="width: 48px; text-align: center;">ஒலி</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(v => {
+                const spokenVal = v[langSpeakKey] || v[this.currentLightboxLang] || v.english || '';
+                const audioText = v[this.currentLightboxLang] || v[langSpeakKey] || v.english;
+                const audioLang = this.currentLightboxLang === 'telugu' ? 'te-IN' : (this.currentLightboxLang === 'kannada' ? 'kn-IN' : (this.currentLightboxLang === 'hindi' ? 'hi-IN' : 'en-US'));
+                return `
+                  <tr>
+                    <td><strong style="color: #f8fafc; font-size: 0.9rem;">${this.escapeHtml(v.english)}</strong></td>
+                    <td style="color: #6ee7b7; font-weight: 600;">${this.escapeHtml(v.tamil)}</td>
+                    ${this.currentLightboxLang !== 'english' ? `
+                      <td>
+                        <span class="speak-tamil-bold" style="color: ${langColor}; font-size: 0.98rem; margin: 0; display: inline-block;">
+                          ${this.escapeHtml(spokenVal)}
+                        </span>
+                      </td>
+                    ` : ''}
+                    <td style="text-align: center;">
+                      <button class="btn-vocab-speak" onclick="window.shortDescApp.speak('${this.escapeAudio(audioText)}', '${audioLang}', '${this.escapeAudio(spokenVal)}')" title="🔊 உச்சரிப்பைக் கேட்க">🔊</button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    const summaryText = story.tagline || story.summary || '';
+    vocabBox.innerHTML = `
+      ${summaryText ? `<div class="lb-summary-text"><strong>💡 சுருக்கம் / விவரம்:</strong> ${this.escapeHtml(summaryText)}</div>` : ''}
+      ${vocabTableHtml}
+    `;
   }
 
   toggleLightboxFooter() {
@@ -804,7 +1380,7 @@ class ShortDescriptionsApp {
     }
     this.isLightboxOpen = false;
     document.body.style.overflow = '';
-    this.stopStoryAudio();
+    this.stopSequentialLightboxAudio();
   }
 
   navigateLightbox(direction) {

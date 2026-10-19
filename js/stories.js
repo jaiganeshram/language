@@ -18,6 +18,16 @@ class StoriesApp {
     this.currentPlayLines = [];
     this.playTimeout = null;
 
+    // Lightbox Split Reader state
+    this.currentLightboxStoryId = null;
+    this.currentLightboxLang = 'english';
+    this.isLightboxOpen = false;
+    this.isLightboxFooterCollapsed = true;
+    this.isLightboxPlaying = false;
+    this.lightboxPlayLang = 'en-US';
+    this.lightboxPlayIndex = 0;
+    this.lightboxPlayTimeout = null;
+
     // Load persisted read stories from localStorage
     try {
       const saved = localStorage.getItem('bhasha_read_stories');
@@ -432,7 +442,7 @@ class StoriesApp {
         <!-- Story Top Header Card -->
         <div class="convo-header-card story-banner-card">
           <div class="convo-header-top-row">
-            <div class="convo-title-wrap">
+            <div class="convo-title-wrap" style="cursor: pointer;" onclick="window.storyApp.openLightbox('${story.id}')" title="ஒப்பீட்டு திரையில் கதையைப் படிக்க (Click to open Split Reader)">
               <span class="convo-icon-pill">${story.icon}</span>
               <div>
                 <h2 class="convo-title-ta">${story.title}</h2>
@@ -440,8 +450,11 @@ class StoriesApp {
               </div>
             </div>
 
-            <!-- Read Button for Entire Story -->
+            <!-- Header Actions -->
             <div class="convo-header-actions">
+              <button class="btn-view-action convo-btn-action" onclick="window.storyApp.openLightbox('${story.id}')" title="ஒப்பீட்டு வாசிப்பு முறை (Side-by-Side Lightbox View)">
+                👁️ View (ஒப்பீடு)
+              </button>
               ${isReadMode ? `
                 <button class="btn-read-action btn-unmark-read convo-btn-action" onclick="window.storyApp.markStoryUnread('${story.id}', this)" title="மீண்டும் படிக்க வேண்டிய பட்டியலுக்கு மாற்று">
                   Undo
@@ -637,6 +650,546 @@ class StoriesApp {
         </div>
       </div>
     `;
+  }
+
+  // ==========================================
+  // Lightbox Modal Comparison & Line-by-Line Viewer Methods
+  // ==========================================
+  escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  escapeAudio(str) {
+    if (!str) return '';
+    return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  openSelectedLightbox() {
+    let targetId = this.selectedStory !== 'all' ? this.selectedStory : null;
+    if (!targetId) {
+      const available = this.mode === 'read'
+        ? STORIES_DATA.filter(s => this.readItems.has(s.id))
+        : STORIES_DATA.filter(s => !this.readItems.has(s.id));
+      targetId = (available[0] || STORIES_DATA[0]).id;
+    }
+    this.openLightbox(targetId);
+  }
+
+  openLightbox(storyId) {
+    const story = STORIES_DATA.find(s => s.id === storyId);
+    if (!story) return;
+
+    this.currentLightboxStoryId = storyId;
+    this.isLightboxOpen = true;
+    this.stopSequentialLightboxAudio();
+
+    // Header info
+    const iconEl = document.getElementById('lb-icon');
+    const titleTaEl = document.getElementById('lb-title-ta');
+    const titleEnEl = document.getElementById('lb-title-en');
+    const badgeEl = document.getElementById('lb-badge');
+    if (iconEl) iconEl.innerText = story.icon || '📚';
+    if (titleTaEl) titleTaEl.innerText = story.title;
+    if (titleEnEl) titleEnEl.innerText = story.titleEn;
+    if (badgeEl) badgeEl.innerText = '15 வரிகள்';
+
+    // Populate Topic Selector in Lightbox Header
+    const jumpSelect = document.getElementById('lb-story-jump-select');
+    if (jumpSelect) {
+      jumpSelect.innerHTML = STORIES_DATA.map((s, idx) => {
+        return `<option value="${s.id}" ${s.id === storyId ? 'selected' : ''}>${idx + 1}. ${s.icon || '📖'} ${s.title}</option>`;
+      }).join('');
+      jumpSelect.value = storyId;
+    }
+
+    // Left Column: Line-by-Line Tamil Content
+    const tamilBox = document.getElementById('lb-content-tamil');
+    if (tamilBox) {
+      tamilBox.innerHTML = `
+        <div class="text-tamil-body">
+          ${story.lines.map((line, idx) => `
+            <div class="lb-sentence sentence-ta" data-line-index="${idx}" title="Click to listen line in Tamil">
+              <div style="display: flex; align-items: baseline;">
+                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
+                <span class="sentence-ta-text">${this.escapeHtml(line.tamil)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Left Tamil Audio Button (Sequential Story Audio)
+    const btnTa = document.getElementById('lb-btn-audio-ta');
+    if (btnTa) {
+      btnTa.classList.remove('active-speaking');
+      btnTa.innerHTML = '🔊 தமிழில் கேட்க';
+      btnTa.onclick = () => {
+        if (this.isLightboxPlaying && this.lightboxPlayLang === 'ta-IN') {
+          this.stopSequentialLightboxAudio();
+        } else {
+          this.playSequentialLightboxAudio('ta-IN');
+        }
+      };
+    }
+
+    // Set combo box to current selection
+    const combo = document.getElementById('lb-lang-combo');
+    if (combo) combo.value = this.currentLightboxLang;
+
+    // Update Right Column Content (Line-by-Line with phonetics)
+    this.updateLightboxOtherContent();
+
+    // Populate Vocab & Summary Footer
+    this.updateLightboxFooterContent();
+
+    // Sync Footer Collapse state
+    this.updateLightboxFooterState();
+
+    // Show modal & prevent background scrolling
+    const modal = document.getElementById('story-lightbox');
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    window.bhashaAudio.playSfx('click');
+  }
+
+  changeLightboxLang(lang) {
+    this.currentLightboxLang = lang;
+    this.stopSequentialLightboxAudio();
+    this.updateLightboxOtherContent();
+    window.bhashaAudio.playSfx('click');
+  }
+
+  updateLightboxOtherContent() {
+    const story = STORIES_DATA.find(s => s.id === this.currentLightboxStoryId);
+    if (!story) return;
+
+    const contentBox = document.getElementById('lb-content-other');
+    const audioBtn = document.getElementById('lb-btn-audio-other');
+    if (!contentBox || !audioBtn) return;
+
+    audioBtn.className = 'slate-audio-btn';
+    let targetLangCode = 'en-US';
+
+    if (this.currentLightboxLang === 'english') {
+      contentBox.innerHTML = `
+        <div class="text-english-body">
+          ${story.lines.map((line, idx) => `
+            <div class="lb-sentence sentence-en" data-line-index="${idx}" title="Click to listen line in English">
+              <div style="display: flex; align-items: baseline;">
+                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
+                <span class="english-line-text">${this.escapeHtml(line.english)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      audioBtn.classList.add('btn-en');
+      audioBtn.innerHTML = '🔊 Listen English';
+      targetLangCode = 'en-US';
+    } else if (this.currentLightboxLang === 'telugu') {
+      contentBox.innerHTML = `
+        <div class="text-telugu-body">
+          ${story.lines.map((line, idx) => `
+            <div class="lb-sentence sentence-te" data-line-index="${idx}" title="Click to listen line in Telugu">
+              <div style="display: flex; align-items: baseline;">
+                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
+                <div class="speak-tamil-bold">${this.escapeHtml(line.teluguSpeak)}</div>
+              </div>
+              ${line.teluguSub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(line.teluguSub)})</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      audioBtn.classList.add('btn-te');
+      audioBtn.innerHTML = '🔊 தெலுங்கு ஒலி (Listen Telugu)';
+      targetLangCode = 'te-IN';
+    } else if (this.currentLightboxLang === 'kannada') {
+      contentBox.innerHTML = `
+        <div class="text-kannada-body">
+          ${story.lines.map((line, idx) => `
+            <div class="lb-sentence sentence-kn" data-line-index="${idx}" title="Click to listen line in Kannada">
+              <div style="display: flex; align-items: baseline;">
+                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
+                <div class="speak-tamil-bold">${this.escapeHtml(line.kannadaSpeak)}</div>
+              </div>
+              ${line.kannadaSub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(line.kannadaSub)})</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      audioBtn.classList.add('btn-kn');
+      audioBtn.innerHTML = '🔊 கன்னட ஒலி (Listen Kannada)';
+      targetLangCode = 'kn-IN';
+    } else if (this.currentLightboxLang === 'hindi') {
+      contentBox.innerHTML = `
+        <div class="text-hindi-body">
+          ${story.lines.map((line, idx) => `
+            <div class="lb-sentence sentence-hi" data-line-index="${idx}" title="Click to listen line in Hindi">
+              <div style="display: flex; align-items: baseline;">
+                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
+                <div class="speak-tamil-bold">${this.escapeHtml(line.hindiSpeak)}</div>
+              </div>
+              ${line.hindiSub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(line.hindiSub)})</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+      audioBtn.classList.add('btn-hi');
+      audioBtn.innerHTML = '🔊 இந்தி ஒலி (Listen Hindi)';
+      targetLangCode = 'hi-IN';
+    }
+
+    audioBtn.onclick = () => {
+      if (this.isLightboxPlaying && this.lightboxPlayLang === targetLangCode) {
+        this.stopSequentialLightboxAudio();
+      } else {
+        this.playSequentialLightboxAudio(targetLangCode);
+      }
+    };
+
+    // Attach sentence click & hover sync
+    this.attachLightboxSentenceInteractions();
+
+    // Re-render vocab drawer to match target language
+    this.updateLightboxFooterContent();
+  }
+
+  attachLightboxSentenceInteractions() {
+    const modal = document.getElementById('story-lightbox');
+    if (!modal) return;
+
+    const sentences = modal.querySelectorAll('.lb-sentence');
+    sentences.forEach((span) => {
+      const idx = span.getAttribute('data-line-index');
+
+      span.onmouseenter = () => {
+        modal.querySelectorAll(`.lb-sentence[data-line-index="${idx}"]`).forEach((s) => {
+          s.classList.add('synced-highlight');
+        });
+      };
+
+      span.onmouseleave = () => {
+        modal.querySelectorAll(`.lb-sentence[data-line-index="${idx}"]`).forEach((s) => {
+          s.classList.remove('synced-highlight');
+        });
+      };
+
+      span.onclick = (e) => {
+        e.stopPropagation();
+        const lineIdx = parseInt(idx, 10);
+        const isLeft = span.closest('.lightbox-col-left') !== null;
+        if (isLeft) {
+          this.speakSingleLightboxLine(lineIdx, 'tamil');
+        } else {
+          this.speakSingleLightboxLine(lineIdx, this.currentLightboxLang);
+        }
+      };
+    });
+  }
+
+  speakSingleLightboxLine(lineIdx, lang) {
+    const story = STORIES_DATA.find(s => s.id === this.currentLightboxStoryId);
+    if (!story || !story.lines[lineIdx]) return;
+
+    this.stopSequentialLightboxAudio();
+
+    const modal = document.getElementById('story-lightbox');
+    if (modal) {
+      modal.querySelectorAll('.lb-sentence').forEach(s => s.classList.remove('synced-active-speaking'));
+      modal.querySelectorAll(`.lb-sentence[data-line-index="${lineIdx}"]`).forEach(s => s.classList.add('synced-active-speaking'));
+    }
+
+    const line = story.lines[lineIdx];
+    let text = '';
+    let langCode = 'ta-IN';
+    let subFallback = '';
+
+    if (lang === 'tamil') {
+      text = line.tamil;
+      langCode = 'ta-IN';
+      subFallback = text;
+    } else if (lang === 'english') {
+      text = line.english;
+      langCode = 'en-US';
+      subFallback = text;
+    } else if (lang === 'telugu') {
+      text = line.teluguScript || line.teluguSpeak;
+      subFallback = line.teluguSub || line.teluguSpeak;
+      langCode = 'te-IN';
+    } else if (lang === 'kannada') {
+      text = line.kannadaScript || line.kannadaSpeak;
+      subFallback = line.kannadaSub || line.kannadaSpeak;
+      langCode = 'kn-IN';
+    } else if (lang === 'hindi') {
+      text = line.hindiScript || line.hindiSpeak;
+      subFallback = line.hindiSub || line.hindiSpeak;
+      langCode = 'hi-IN';
+    }
+
+    if (text) {
+      this.speak(text, langCode, subFallback);
+      const durationMs = Math.max(2200, (text.length * 80) / this.audioSpeed);
+      setTimeout(() => {
+        if (modal) {
+          modal.querySelectorAll(`.lb-sentence[data-line-index="${lineIdx}"]`).forEach(s => s.classList.remove('synced-active-speaking'));
+        }
+      }, durationMs);
+    }
+  }
+
+  playSequentialLightboxAudio(targetLang) {
+    const story = STORIES_DATA.find(s => s.id === this.currentLightboxStoryId);
+    if (!story) return;
+
+    this.stopSequentialLightboxAudio();
+    this.isLightboxPlaying = true;
+    this.lightboxPlayLang = targetLang;
+    this.lightboxPlayIndex = 0;
+    this.lightboxPlayLines = story.lines;
+
+    // Toggle button state
+    const btn = targetLang === 'ta-IN' ? document.getElementById('lb-btn-audio-ta') : document.getElementById('lb-btn-audio-other');
+    if (btn) {
+      btn.classList.add('active-speaking');
+      btn.innerHTML = '⏹️ நிறுத்து (Stop)';
+    }
+
+    this.playNextLightboxLine();
+  }
+
+  playNextLightboxLine() {
+    if (!this.isLightboxPlaying || this.lightboxPlayIndex >= this.lightboxPlayLines.length) {
+      this.stopSequentialLightboxAudio();
+      this.showToast('🎉 கதை வாசிப்பு நிறைவடைந்தது!');
+      return;
+    }
+
+    const idx = this.lightboxPlayIndex;
+    const line = this.lightboxPlayLines[idx];
+    const modal = document.getElementById('story-lightbox');
+
+    if (modal) {
+      modal.querySelectorAll('.lb-sentence').forEach(s => s.classList.remove('synced-active-speaking'));
+      const activeCards = modal.querySelectorAll(`.lb-sentence[data-line-index="${idx}"]`);
+      activeCards.forEach(s => s.classList.add('synced-active-speaking'));
+      if (activeCards[0]) {
+        activeCards[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    let text = '';
+    let sub = '';
+    if (this.lightboxPlayLang === 'ta-IN') {
+      text = line.tamil;
+      sub = line.tamil;
+    } else if (this.lightboxPlayLang === 'en-US') {
+      text = line.english;
+      sub = line.english;
+    } else if (this.lightboxPlayLang === 'te-IN') {
+      text = line.teluguScript || line.teluguSpeak;
+      sub = line.teluguSub || line.teluguSpeak;
+    } else if (this.lightboxPlayLang === 'kn-IN') {
+      text = line.kannadaScript || line.kannadaSpeak;
+      sub = line.kannadaSub || line.kannadaSpeak;
+    } else if (this.lightboxPlayLang === 'hi-IN') {
+      text = line.hindiScript || line.hindiSpeak;
+      sub = line.hindiSub || line.hindiSpeak;
+    }
+
+    this.speak(text, this.lightboxPlayLang, sub);
+
+    const durationMs = Math.max(2600, (text.length * 85) / this.audioSpeed);
+    this.lightboxPlayTimeout = setTimeout(() => {
+      this.lightboxPlayIndex++;
+      this.playNextLightboxLine();
+    }, durationMs);
+  }
+
+  stopSequentialLightboxAudio() {
+    this.isLightboxPlaying = false;
+    if (this.lightboxPlayTimeout) {
+      clearTimeout(this.lightboxPlayTimeout);
+      this.lightboxPlayTimeout = null;
+    }
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+
+    const modal = document.getElementById('story-lightbox');
+    if (modal) {
+      modal.querySelectorAll('.lb-sentence').forEach(s => s.classList.remove('synced-active-speaking'));
+    }
+
+    const btnTa = document.getElementById('lb-btn-audio-ta');
+    if (btnTa) {
+      btnTa.classList.remove('active-speaking');
+      btnTa.innerHTML = '🔊 தமிழில் கேட்க';
+    }
+
+    const btnOther = document.getElementById('lb-btn-audio-other');
+    if (btnOther) {
+      btnOther.classList.remove('active-speaking');
+      if (this.currentLightboxLang === 'english') btnOther.innerHTML = '🔊 Listen English';
+      else if (this.currentLightboxLang === 'telugu') btnOther.innerHTML = '🔊 தெலுங்கு ஒலி (Listen Telugu)';
+      else if (this.currentLightboxLang === 'kannada') btnOther.innerHTML = '🔊 கன்னட ஒலி (Listen Kannada)';
+      else if (this.currentLightboxLang === 'hindi') btnOther.innerHTML = '🔊 இந்தி ஒலி (Listen Hindi)';
+    }
+  }
+
+  updateLightboxFooterContent() {
+    const story = STORIES_DATA.find(s => s.id === this.currentLightboxStoryId);
+    const vocabBox = document.getElementById('lb-vocab-summary');
+    if (!story || !vocabBox) return;
+
+    const items = window.getVocabComparison 
+      ? window.getVocabComparison([], story.id)
+      : [];
+
+    let langHeaderTitle = 'ஆங்கில சொல்லகராதி (English Vocab)';
+    let langColHeader = 'ஆங்கிலம்';
+    let langSpeakKey = 'english';
+    let langColor = '#38bdf8';
+
+    if (this.currentLightboxLang === 'telugu') {
+      langHeaderTitle = 'தெலுங்கு சொல்லகராதி (Telugu Vocab in Tamil)';
+      langColHeader = '🗣️ தெலுங்கு (தமிழில் உச்சரிப்பு)';
+      langSpeakKey = 'teluguSpeak';
+      langColor = '#38bdf8';
+    } else if (this.currentLightboxLang === 'kannada') {
+      langHeaderTitle = 'கன்னட சொல்லகராதி (Kannada Vocab in Tamil)';
+      langColHeader = '🗣️ கன்னடம் (தமிழில் உச்சரிப்பு)';
+      langSpeakKey = 'kannadaSpeak';
+      langColor = '#fb923c';
+    } else if (this.currentLightboxLang === 'hindi') {
+      langHeaderTitle = 'இந்தி சொல்லகராதி (Hindi Vocab in Tamil)';
+      langColHeader = '🗣️ இந்தி (தமிழில் உச்சரிப்பு)';
+      langSpeakKey = 'hindiSpeak';
+      langColor = '#c084fc';
+    }
+
+    let vocabTableHtml = '';
+    if (items.length > 0) {
+      vocabTableHtml = `
+        <div class="lb-vocab-table-wrap">
+          <div style="font-size: 0.82rem; font-weight: 700; color: #fbbf24; margin-bottom: 0.45rem; display: flex; align-items: center; justify-content: space-between; padding: 0.35rem 0.5rem 0;">
+            <span>✨ ${langHeaderTitle}:</span>
+            <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 500;">கலைச்சொற்கள் & பல மொழி உச்சரிப்பு</span>
+          </div>
+          <table class="lb-vocab-mini-table">
+            <thead>
+              <tr>
+                <th style="min-width: 130px;">ஆங்கில சொல் (English)</th>
+                <th style="min-width: 140px;">தமிழ் அர்த்தம் (Meaning)</th>
+                ${this.currentLightboxLang !== 'english' ? `<th style="min-width: 160px;">${langColHeader}</th>` : ''}
+                <th style="width: 48px; text-align: center;">ஒலி</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${items.map(v => {
+                const spokenVal = v[langSpeakKey] || v[this.currentLightboxLang] || v.english || '';
+                const audioText = v[this.currentLightboxLang] || v[langSpeakKey] || v.english;
+                const audioLang = this.currentLightboxLang === 'telugu' ? 'te-IN' : (this.currentLightboxLang === 'kannada' ? 'kn-IN' : (this.currentLightboxLang === 'hindi' ? 'hi-IN' : 'en-US'));
+                return `
+                  <tr>
+                    <td><strong style="color: #f8fafc; font-size: 0.9rem;">${this.escapeHtml(v.english)}</strong></td>
+                    <td style="color: #6ee7b7; font-weight: 600;">${this.escapeHtml(v.tamil)}</td>
+                    ${this.currentLightboxLang !== 'english' ? `
+                      <td>
+                        <span class="speak-tamil-bold" style="color: ${langColor}; font-size: 0.98rem; margin: 0; display: inline-block;">
+                          ${this.escapeHtml(spokenVal)}
+                        </span>
+                      </td>
+                    ` : ''}
+                    <td style="text-align: center;">
+                      <button class="btn-vocab-speak" onclick="window.storyApp.speak('${this.escapeAudio(audioText)}', '${audioLang}', '${this.escapeAudio(spokenVal)}')" title="🔊 உச்சரிப்பைக் கேட்க">🔊</button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    vocabBox.innerHTML = `
+      <div class="lb-summary-text"><strong>💡 கதை நீதி (Moral):</strong> ${this.escapeHtml(story.moralTa)} <em>(${this.escapeHtml(story.moralEn)})</em></div>
+      ${vocabTableHtml}
+    `;
+  }
+
+  toggleLightboxFooter() {
+    this.isLightboxFooterCollapsed = !this.isLightboxFooterCollapsed;
+    this.updateLightboxFooterState();
+    if (window.bhashaAudio) {
+      window.bhashaAudio.playSfx('click');
+    }
+  }
+
+  updateLightboxFooterState() {
+    const drawer = document.getElementById('lb-footer-drawer');
+    const toggleBtn = document.getElementById('lb-collapse-toggle-btn');
+    const iconEl = document.getElementById('lb-collapse-icon');
+    const textEl = document.getElementById('lb-collapse-text');
+
+    if (!drawer || !toggleBtn) return;
+
+    if (this.isLightboxFooterCollapsed) {
+      drawer.classList.remove('is-expanded');
+      toggleBtn.classList.remove('active');
+      if (iconEl) iconEl.textContent = '✨';
+      if (textEl) textEl.textContent = 'கலைச்சொற்கள் & குறிப்பு (Vocab) ▲';
+      toggleBtn.title = 'கலைச்சொற்கள் & குறிப்புகளை விரித்து காட்டுக (Expand)';
+    } else {
+      drawer.classList.add('is-expanded');
+      toggleBtn.classList.add('active');
+      if (iconEl) iconEl.textContent = '▼';
+      if (textEl) textEl.textContent = 'சுருக்கு (Collapse)';
+      toggleBtn.title = 'கலைச்சொற்கள் & குறிப்புகளை சுருக்குக (Collapse)';
+    }
+  }
+
+  closeLightbox(event) {
+    if (event && event.target && event.target.id !== 'story-lightbox') {
+      return;
+    }
+    const modal = document.getElementById('story-lightbox');
+    if (modal) {
+      modal.style.display = 'none';
+    }
+    this.isLightboxOpen = false;
+    document.body.style.overflow = '';
+    this.stopSequentialLightboxAudio();
+  }
+
+  navigateLightbox(direction) {
+    let availableStories = STORIES_DATA;
+    if (this.selectedStory !== 'all') {
+      availableStories = availableStories.filter(s => s.id === this.selectedStory);
+    }
+    if (availableStories.length === 0) availableStories = STORIES_DATA;
+
+    const currentIdx = availableStories.findIndex(s => s.id === this.currentLightboxStoryId);
+    if (currentIdx === -1) {
+      this.openLightbox(availableStories[0].id);
+      return;
+    }
+
+    let nextIdx = currentIdx + direction;
+    if (nextIdx < 0) nextIdx = availableStories.length - 1;
+    if (nextIdx >= availableStories.length) nextIdx = 0;
+
+    this.openLightbox(availableStories[nextIdx].id);
   }
 }
 

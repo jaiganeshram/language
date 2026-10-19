@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multilingual Stories | தமிழ் • English • తెలుగు • ಕನ್ನಡ • हिन्दी</title>
+  <meta name="description" content="Engaging 15-line bite-sized stories with synchronized parallel panels in Tamil, English, Telugu, Kannada, and Hindi with Web Speech audio.">
+  <meta name="keywords" content="learn languages through stories, tamil english telugu kannada hindi, multilingual stories, bilingual reader, 15 line short stories">
+
+  <!-- Google Fonts: Modern sans & crisp South Asian typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anek+Tamil:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Telugu:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="assets/css/style.css?v=2.9">
+</head>
+<body>
+
+  <!-- Sticky Glassmorphic Header -->
+  <header class="header-glass">
+    <div class="header-container">
+      <div class="brand-wrapper">
+        <div class="logo-badge" title="5-Language Multilingual Stories">5L</div>
+        <div class="brand-info">
+          <h1>
+            BhashaTamil • Multilingual Stories
+            <span class="tag-pill">Short Paragraph &bull; 5 Languages</span>
+          </h1>
+          <p>தமிழ் &bull; English &bull; తెలుగు &bull; ಕನ್ನಡ &bull; हिन्दी &bull; 100 Synchronized Stories</p>
+        </div>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="header-actions">
+        <!-- Font Size Scaler -->
+        <div class="font-size-group" title="Adjust Text Size">
+          <button data-size="sm" title="Compact">A-</button>
+          <button data-size="md" class="active" title="Default">A</button>
+          <button data-size="lg" title="Large">A+</button>
+        </div>
+
+        <!-- Link to 100 Static HTML Archive -->
+        <a href="htmls/index.html" class="btn-static-archive-link" title="Open complete static HTML directory of all 100 stories">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <span>100 Static Pages</span>
+        </a>
+
+        <!-- AI Story Generator Button -->
+        <button id="btnOpenAiGenerator" class="btn-ai-generator" title="Generate Custom Trilingual Story" aria-label="AI Story Generator">
+          <span class="ai-sparkle">✨</span>
+          <span>AI Story Generator</span>
+        </button>
+
+        <!-- Light / Dark Theme Toggle -->
+        <button id="themeToggleBtn" class="btn-icon" title="Toggle Theme" aria-label="Toggle Theme">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- Page Navigation Bar (6-Tab Universal Header) -->
+  <nav class="page-nav-bar">
+    <div class="nav-container">
+      <a href="index.html" class="page-nav-item">
+        📖 சொற்கள் ஒப்பீட்டு அட்டவணை (173 Words)
+      </a>
+      <a href="conversations.html" class="page-nav-item">
+        💬 நேரடி உரையாடல்கள் (Conversations)
+      </a>
+      <a href="stories.html" class="page-nav-item">
+        📚 15 வரிக் கதைகள் (Classic Stories)
+      </a>
+      <a href="daily_reading.html" class="page-nav-item">
+        🖼️ தினசரி வாசிப்பு & கதைகள் (Daily Reading)
+      </a>
+      <a href="short_descriptions.html" class="page-nav-item">
+        📝 சிறு விவரிப்புகள் (Short Descriptions)
+      </a>
+      <a href="english.html" class="page-nav-item active">
+        🇬🇧 ஆங்கிலக் கதைகள் (English Stories)
+      </a>
+    </div>
+  </nav>
+
+  <!-- Main Content Layout -->
+  <main class="main-wrapper">
+
+    <!-- Story Selector Grid Strip -->
+    <section class="story-selection-bar" aria-label="Stories Selector">
+      <div class="selection-header">
+        <div class="selection-header-left">
+          <div class="selection-title">
+            <span id="storyPlaceTitle">📚 Stories To Read</span>
+          </div>
+          <div class="story-place-tabs" role="tablist" aria-label="Story place filters">
+            <button class="story-place-tab active" id="tabPlaceToRead" data-tab="active" role="tab" aria-selected="true" title="Stories waiting to be read">
+              <span>📖 To Read</span>
+              <span class="place-count-badge" id="badgeToReadCount">100</span>
+            </button>
+            <button class="story-place-tab" id="tabPlaceHidden" data-tab="hidden" role="tab" aria-selected="false" title="Hidden place for completed read stories">
+              <span>📁 Hidden / Read</span>
+              <span class="place-count-badge count-hidden" id="badgeHiddenCount">0</span>
+            </button>
+          </div>
+        </div>
+        <div class="selection-header-right">
+          <div class="selection-meta-badge" id="storyPlaceSubtitle">
+            ⚡ Active reading list &bull; Mark as read to move to hidden
+          </div>
+          <button id="btnToggleGridView" class="btn-toggle-grid" type="button" title="Toggle between compact shelf and full expanded grid view">
+            <span id="toggleGridIcon">⊞</span>
+            <span id="toggleGridText">Expand All (100)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search & Category Filter Controls -->
+      <div class="story-filter-controls">
+        <div class="story-search-bar">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="storySearchInput" placeholder="Search 100 stories by title, topic, English or தமிழ்..." autocomplete="off">
+          <button id="clearSearchBtn" class="btn-clear-search" style="display:none;" title="Clear search">&times;</button>
+        </div>
+        <div class="category-filter-chips" id="categoryFilterChips" role="tablist" aria-label="Story Categories">
+          <button class="cat-chip active" data-category="all">🌟 All Categories (<span id="totalStoriesBadge">100</span>)</button>
+          <button class="cat-chip chip-ai-filter" data-category="ai_only" id="chipAiOnly" title="Filter to show only AI generated stories">✨ AI Stories (<span id="aiStoriesBadge">0</span>)</button>
+          <button class="cat-chip" data-category="Daily Life & Practical Conversations">☕ Daily Life</button>
+          <button class="cat-chip" data-category="Workplace & Career Mastery">💼 Career & Office</button>
+          <button class="cat-chip" data-category="Inspiration & Wisdom">💡 Wisdom & Focus</button>
+          <button class="cat-chip" data-category="Travel & Global Adventures">✈️ Travel & Transit</button>
+          <button class="cat-chip" data-category="Technology & Future">🤖 Tech & Future</button>
+          <button class="cat-chip" data-category="Social & Relationships">🤝 Human Bonds</button>
+        </div>
+      </div>
+
+      <div class="story-cards-scroll" id="storyPillCards">
+        <!-- Injected dynamically by stories.js / app.js -->
+      </div>
+      <div class="shelf-hint-bar">
+        <span>💡 <strong>Quick Read:</strong> Click any topic card to immediately jump to the story &bull; Or scroll horizontally/vertically inside shelf</span>
+      </div>
+    </section>
+
+    <!-- Active Story Hero Banner -->
+    <section class="story-hero-banner" id="storyHeroSection" aria-label="Story Information">
+      <!-- Story Reader Quick Navigation Bar -->
+      <div class="story-quick-nav-bar">
+        <button id="btnJumpToTopics" class="btn-nav-jump" type="button" title="Scroll up to browse topic cards (Alt + Up)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+          <span>Browse 100 Topics</span>
+        </button>
+
+        <div class="story-quick-switcher">
+          <button id="btnPrevStory" class="btn-nav-story" type="button" title="Previous Story (Alt + Left)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            <span>Previous</span>
+          </button>
+
+          <div class="quick-story-dropdown-wrapper">
+            <select id="quickStorySelect" class="quick-story-select" title="Jump directly to any story">
+              <!-- Dynamically populated in app.js -->
+            </select>
+          </div>
+
+          <button id="btnNextStory" class="btn-nav-story" type="button" title="Next Story (Alt + Right)">
+            <span>Next</span>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-titles-row">
+        <div class="hero-titles-col">
+          <div class="hero-badge-group">
+            <span class="badge-tag strict-lines" id="heroLineCount">📖 Short Story Paragraph</span>
+            <span class="badge-tag category" id="heroCategory">Inspiration</span>
+            <span class="badge-tag" style="background: rgba(255,255,255,0.08); color: var(--text-secondary);" id="heroReadTime">⏱️ 1.5 min read</span>
+            <span class="badge-tag" id="heroReadStatusBadge" style="display: none; background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);">✅ Completed</span>
+            <span class="badge-tag ai-generated-badge" id="heroAiBadge" style="display: none;">✨ AI Generated Story</span>
+          </div>
+          <h2 class="hero-main-title" id="heroNormalTitle">The Clockmaker's Secret</h2>
+          <div class="hero-ta-title" id="heroTamilTitle">கடிகாரக்காரனின் ரகசியம்</div>
+        </div>
+
+        <!-- Quick Summary Box -->
+        <div style="flex: 1; min-width: 280px; max-width: 520px; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="font-size: 0.75rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 0.35rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>Story Essence / கதை சுருக்கம்:</span>
+          </div>
+          <p id="heroSummaryNormal" style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 0.35rem;"></p>
+          <p id="heroSummaryTamil" style="font-size: 0.86rem; font-family: var(--font-ta); color: #6ee7b7; margin: 0;"></p>
+        </div>
+      </div>
+
+      <!-- Audio Narration & View Mode Controls Bar -->
+      <div class="hero-controls-bar">
+        <div class="player-controls">
+          <!-- Split Lightbox Fullscreen Reader Button -->
+          <button id="btnHeroOpenLightbox" class="btn-hero-lightbox" title="முழுத்திரை ஒப்பீட்டு வாசிப்பு முறை (Open Side-by-Side Lightbox Reader)">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+            <span>📖 முழுத்திரை வாசிப்பு (Lightbox)</span>
+          </button>
+
+          <!-- Play All TTS Button -->
+          <button id="btnPlayStory" class="btn-play-all" title="Listen to story aloud">
+            <span id="playBtnIcon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+            </span>
+            <span id="playBtnText">Listen Story (Aloud)</span>
+          </button>
+
+          <!-- Read / Unread Marker Button -->
+          <button id="btnToggleRead" class="btn-read-marker" title="Mark this story as read (moves to hidden) or unread">
+            <svg class="marker-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span id="readMarkerText">Mark as Read</span>
+          </button>
+
+          <!-- AI Story Marker Button -->
+          <button id="btnToggleAiMarker" class="btn-ai-marker" title="AI Story Marker: Toggle AI marker status for this story">
+            <span id="aiMarkerIcon">✨</span>
+            <span id="aiMarkerText">AI Story</span>
+          </button>
+
+          <!-- Audio Mode Selector -->
+          <select id="selectTtsVoice" class="select-tts-lang" title="Select Audio Language">
+            <option value="normal" selected>🇬🇧 English Audio (en-US)</option>
+            <option value="tamil">🇮🇳 தமிழ் ஒலி (ta-IN)</option>
+            <option value="telugu">🗣️ தெலுங்கு ஒலி (te-IN)</option>
+            <option value="kannada">🗣️ கன்னட ஒலி (kn-IN)</option>
+            <option value="hindi">🗣️ இந்தி ஒலி (hi-IN)</option>
+          </select>
+
+          <!-- Speed Rate -->
+          <div class="speech-rate-wrapper">
+            <span>Speed:</span>
+            <select id="speechRateSelect" class="select-tts-lang" style="padding: 0.35rem 0.6rem;">
+              <option value="0.85">0.85x (Slow & Clear)</option>
+              <option value="1.0" selected>1.0x (Normal)</option>
+              <option value="1.15">1.15x (Brisk)</option>
+            </select>
+          </div>
+
+          <!-- Static HTML Page Direct Link -->
+          <a id="btnViewStaticHtml" class="btn-static-link" href="htmls/story-001.html" target="_blank" title="Open this story as an independent standalone static HTML page">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+            <span>Static HTML</span>
+          </a>
+        </div>
+
+        <!-- View Mode Switcher -->
+        <div class="view-mode-toggle">
+          <button class="view-mode-btn active" data-mode="parallel" title="Synchronized Multi-Panel Paragraph View">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="1"></rect><rect x="10" y="3" width="5" height="18" rx="1"></rect><rect x="17" y="3" width="5" height="18" rx="1"></rect></svg>
+            Multi-Panel View
+          </button>
+          <button class="view-mode-btn" data-mode="sentence" title="Sentence-by-Sentence Card View">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"></rect><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            1-Sentence Focus
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Language Filter Toolbar inside Single Page -->
+    <div class="lang-filter-bar" aria-label="Language Filters">
+      <span class="lang-filter-label">காண்பிக்க வேண்டிய மொழிகள்:</span>
+      <button class="lang-filter-btn active" id="filterLangTaEn" data-view="ta_en">
+        🇮🇳 தமிழ் + 🇬🇧 English மட்டும் (Clean Reading)
+      </button>
+      <button class="lang-filter-btn" id="filterLangSpoken" data-view="spoken">
+        🗣️ தெலுங்கு, கன்னடம், இந்தி (Spoken Practice)
+      </button>
+      <button class="lang-filter-btn" id="filterLangAll" data-view="all">
+        🌐 அனைத்து 5 மொழிகளும் (All 5 Panels)
+      </button>
+    </div>
+
+    <!-- Mobile Tabs (Visible only on smaller screens) -->
+    <nav class="mobile-tab-nav" aria-label="Mobile language selector">
+      <button class="mobile-tab-btn active" data-target="tamil">🇮🇳 தமிழ்</button>
+      <button class="mobile-tab-btn" data-target="normal">🇬🇧 English</button>
+      <button class="mobile-tab-btn" data-target="telugu">🗣️ தெலுங்கு</button>
+      <button class="mobile-tab-btn" data-target="kannada">🗣️ கன்னடம்</button>
+      <button class="mobile-tab-btn" data-target="hindi">🗣️ இந்தி</button>
+    </nav>
+
+    <!-- ==========================================================================
+         THE 5-PANEL SYNCHRONIZED READER (Tamil, English, Telugu, Kannada, Hindi)
+         ========================================================================== -->
+    <section class="panels-grid view-ta-en" id="panelsGrid" aria-label="Multilingual Parallel Reader">
+      
+      <!-- Panel 1: Tamil -->
+      <article class="reader-panel panel-tamil active-tab-panel" id="panelTamil">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-indicator"></span>
+            <div class="panel-title-text">
+              <h3>தமிழ் (Tamil)</h3>
+              <p>இயல்பான எளிய தமிழ் மொழிபெயர்ப்பு</p>
+            </div>
+          </div>
+          <div class="panel-header-actions">
+            <button class="btn-panel-audio" data-lang="tamil" title="🔊 தமிழில் முழு கதையைக் கேட்க" aria-label="Listen in Tamil">
+              🔊
+            </button>
+            <button class="btn-panel-view" data-panel="tamil" title="Open Tamil in Lightbox View" aria-label="View Tamil story in Lightbox">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span>View</span>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body" id="panelTamilBody">
+          <!-- Lines injected via JS -->
+        </div>
+      </article>
+
+      <!-- Panel 2: English -->
+      <article class="reader-panel panel-normal" id="panelNormal">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-indicator"></span>
+            <div class="panel-title-text">
+              <h3>ஆங்கிலம் (English)</h3>
+              <p>Everyday conversation &amp; clear grammar</p>
+            </div>
+          </div>
+          <div class="panel-header-actions">
+            <button class="btn-panel-audio" data-lang="normal" title="🔊 Listen full story in English" aria-label="Listen in English">
+              🔊
+            </button>
+            <button class="btn-panel-view" data-panel="normal" title="Open English in Lightbox View" aria-label="View English story in Lightbox">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span>View</span>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body" id="panelNormalBody">
+          <!-- Lines injected via JS -->
+        </div>
+      </article>
+
+      <!-- Panel 3: Telugu -->
+      <article class="reader-panel panel-telugu panel-hidden-by-filter" id="panelTelugu">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-indicator"></span>
+            <div class="panel-title-text">
+              <h3>தெலுங்கு (Telugu)</h3>
+              <p>தமிழ் எழுத்துகளில் பேசும் உச்சரிப்பு</p>
+            </div>
+          </div>
+          <div class="panel-header-actions">
+            <button class="btn-panel-audio" data-lang="telugu" title="🔊 தெலுங்கில் கேட்க (Listen Telugu)" aria-label="Listen in Telugu">
+              🔊
+            </button>
+            <button class="btn-panel-view" data-panel="telugu" title="Open Telugu in Lightbox View" aria-label="View Telugu story in Lightbox">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span>View</span>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body" id="panelTeluguBody">
+          <!-- Lines injected via JS -->
+        </div>
+      </article>
+
+      <!-- Panel 4: Kannada -->
+      <article class="reader-panel panel-kannada panel-hidden-by-filter" id="panelKannada">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-indicator"></span>
+            <div class="panel-title-text">
+              <h3>கன்னடம் (Kannada)</h3>
+              <p>தமிழ் எழுத்துகளில் பேசும் உச்சரிப்பு</p>
+            </div>
+          </div>
+          <div class="panel-header-actions">
+            <button class="btn-panel-audio" data-lang="kannada" title="🔊 கன்னடத்தில் கேட்க (Listen Kannada)" aria-label="Listen in Kannada">
+              🔊
+            </button>
+            <button class="btn-panel-view" data-panel="kannada" title="Open Kannada in Lightbox View" aria-label="View Kannada story in Lightbox">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span>View</span>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body" id="panelKannadaBody">
+          <!-- Lines injected via JS -->
+        </div>
+      </article>
+
+      <!-- Panel 5: Hindi -->
+      <article class="reader-panel panel-hindi panel-hidden-by-filter" id="panelHindi">
+        <div class="panel-header">
+          <div class="panel-header-left">
+            <span class="panel-indicator"></span>
+            <div class="panel-title-text">
+              <h3>இந்தி (Hindi)</h3>
+              <p>தமிழ் எழுத்துகளில் பேசும் உச்சரிப்பு</p>
+            </div>
+          </div>
+          <div class="panel-header-actions">
+            <button class="btn-panel-audio" data-lang="hindi" title="🔊 இந்தியில் கேட்க (Listen Hindi)" aria-label="Listen in Hindi">
+              🔊
+            </button>
+            <button class="btn-panel-view" data-panel="hindi" title="Open Hindi in Lightbox View" aria-label="View Hindi story in Lightbox">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <span>View</span>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body" id="panelHindiBody">
+          <!-- Lines injected via JS -->
+        </div>
+      </article>
+
+    </section>
+
+    <!-- Sentence-by-Sentence Card View (Alternative zero-distraction mode) -->
+    <section class="sentence-mode-container" id="sentenceModeContainer" aria-label="Step-by-Step Sentence Mode">
+      <div class="card-step-header">
+        <div style="font-weight: 800; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>🎯 Focused Sentence Comparison (5 Languages)</span>
+        </div>
+        <div class="card-step-progress">
+          Sentence <span id="sentenceStepNum">1</span> of <span id="sentenceStepTotal">15</span>
+        </div>
+      </div>
+
+      <div class="card-tri-blocks">
+        <!-- Tamil block -->
+        <div class="card-block block-tamil">
+          <div class="card-block-label">
+            <span>தமிழ் (Tamil)</span>
+            <span>Panel 1</span>
+          </div>
+          <div class="card-block-text" id="stepBlockTamil"></div>
+        </div>
+
+        <!-- English block -->
+        <div class="card-block block-normal">
+          <div class="card-block-label">
+            <span>ஆங்கிலம் (English)</span>
+            <span>Panel 2</span>
+          </div>
+          <div class="card-block-text" id="stepBlockNormal"></div>
+        </div>
+
+        <!-- Telugu block -->
+        <div class="card-block block-telugu">
+          <div class="card-block-label">
+            <span>తెలుగు (Telugu)</span>
+            <span>Panel 3</span>
+          </div>
+          <div class="card-block-text" id="stepBlockTelugu"></div>
+        </div>
+
+        <!-- Kannada block -->
+        <div class="card-block block-kannada">
+          <div class="card-block-label">
+            <span>ಕನ್ನಡ (Kannada)</span>
+            <span>Panel 4</span>
+          </div>
+          <div class="card-block-text" id="stepBlockKannada"></div>
+        </div>
+
+        <!-- Hindi block -->
+        <div class="card-block block-hindi">
+          <div class="card-block-label">
+            <span>हिन्दी (Hindi)</span>
+            <span>Panel 5</span>
+          </div>
+          <div class="card-block-text" id="stepBlockHindi"></div>
+        </div>
+      </div>
+
+      <div class="card-nav-footer">
+        <button id="btnPrevSentence" class="btn-card-nav" title="Previous sentence">
+          &larr; Previous Sentence
+        </button>
+        <button id="btnNextSentence" class="btn-card-nav" style="background: var(--normal-gradient); color: #fff; border: none;" title="Next sentence">
+          Next Sentence &rarr;
+        </button>
+      </div>
+    </section>
+
+    <!-- ==========================================================================
+         EXTRAS: VOCABULARY CONTRAST MATRIX & INTERACTIVE MICRO-QUIZ
+         ========================================================================== -->
+    <section class="extras-grid" aria-label="Vocabulary Matrix and Quiz">
+
+      <!-- Vocabulary Table -->
+      <div class="extras-card">
+        <div class="extras-header">
+          <div class="extras-title">
+            <span>💎 முக்கிய சொல்லகராதி (Vocabulary &amp; Tamil Meanings)</span>
+          </div>
+          <span style="font-size: 0.75rem; color: var(--text-muted);">எல்லா மொழிகளிலும் சொற்களைக் கற்கலாம் (Learn in all languages)</span>
+        </div>
+
+        <!-- Language Selector Pills for Vocabulary -->
+        <div class="vocab-lang-pills" id="vocabLangPills" aria-label="Vocabulary Language Select">
+          <button class="vocab-pill-btn active" data-vlang="english">🇬🇧 English</button>
+          <button class="vocab-pill-btn" data-vlang="telugu">🗣️ தெலுங்கு (Telugu)</button>
+          <button class="vocab-pill-btn" data-vlang="kannada">🗣️ கன்னடம் (Kannada)</button>
+          <button class="vocab-pill-btn" data-vlang="hindi">🗣️ இந்தி (Hindi)</button>
+          <button class="vocab-pill-btn" data-vlang="all">🌐 அனைத்து 5 மொழிகளும் (All 5)</button>
+        </div>
+
+        <div class="vocab-table-container">
+          <table class="vocab-table">
+            <thead id="vocabTableHead">
+              <!-- Dynamically populated based on selected language -->
+            </thead>
+            <tbody id="vocabTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Quick Check Micro-Quiz (2 Questions at a time from pool) -->
+      <div class="extras-card">
+        <div class="extras-header">
+          <div class="extras-title">
+            <span>🧠 Quick Check Micro-Quiz</span>
+          </div>
+          <span id="quizBadgeIndicator" style="font-size: 0.72rem; color: #10b981; font-weight: 700; background: rgba(16, 185, 129, 0.12); padding: 0.2rem 0.65rem; border-radius: 999px;">
+            Set 1 of 3 (2 Questions)
+          </span>
+        </div>
+
+        <!-- Language Selector Pills for Quiz -->
+        <div class="quiz-lang-pills" id="quizLangPills" aria-label="Quiz Language Select">
+          <button class="quiz-pill-btn active" data-qlang="english">🇬🇧 English Quiz</button>
+          <button class="quiz-pill-btn" data-qlang="telugu">🗣️ தெலுங்கு Quiz</button>
+          <button class="quiz-pill-btn" data-qlang="kannada">🗣️ கன்னடம் Quiz</button>
+          <button class="quiz-pill-btn" data-qlang="hindi">🗣️ இந்தி Quiz</button>
+        </div>
+
+        <div class="quiz-box" id="quizContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       SPLIT-PANEL LIGHTBOX MODAL (100% Side-by-Side Reading Concept)
+       ========================================================================== -->
+  <div class="story-lightbox-overlay" id="story-lightbox" style="display: none;">
+    <div class="story-lightbox-container" id="storyLightboxContainer">
+      <!-- Lightbox Header (Ultra-Compact Single Row: ~40px) -->
+      <div class="lightbox-header">
+        <div class="lightbox-title-wrap">
+          <span class="lightbox-icon" id="lb-icon">📖</span>
+          <h2 class="lightbox-title-ta" id="lb-title-ta">கதைத் தலைப்பு</h2>
+          <span class="lightbox-title-en" id="lb-title-en">Story Title English</span>
+          <span class="lightbox-badge" id="lb-badge">Story</span>
+        </div>
+        <div class="lightbox-header-actions">
+          <select id="lb-story-jump-select" class="lightbox-story-jump-select" title="வேறு கதையைத் தேர்வு செய்ய (Switch Story)">
+            <!-- Injected dynamically by app.js for all 100 stories -->
+          </select>
+          <button class="lightbox-close-btn" id="lightboxCloseBtn" title="மூடுக (Close - Esc)" aria-label="Close">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Lightbox Split Body: Left Tamil, Right Other Language with Combo Box -->
+      <div class="lightbox-split-body">
+        <!-- Left Panel: Fixed Tamil Content -->
+        <div class="lightbox-col lightbox-col-left">
+          <div class="lightbox-col-header">
+            <span class="slate-lang-badge badge-ta">🇮🇳 தமிழ் (Tamil)</span>
+            <button class="slate-audio-btn btn-ta" id="lb-btn-audio-ta" title="தமிழில் முழுப் பத்தியையும் கேட்க">
+              🔊 தமிழில் கேட்க
+            </button>
+          </div>
+          <div class="lightbox-content-box text-tamil" id="lb-content-tamil">
+            <!-- Injected by app.js -->
+          </div>
+        </div>
+
+        <!-- Right Panel: Switchable Other Content via Combo Box (Cyan Glow Border) -->
+        <div class="lightbox-col lightbox-col-right">
+          <div class="lightbox-col-header">
+            <select id="lb-lang-combo" class="lightbox-combo-select" title="மொழியைத் தேர்வு செய்க">
+              <option value="english">🇬🇧 English (ஆங்கிலம்)</option>
+              <option value="telugu">🗣️ தெலுங்கில் பேச (Telugu)</option>
+              <option value="kannada">🗣️ கன்னடத்தில் பேச (Kannada)</option>
+              <option value="hindi">🗣️ இந்தியில் பேச (Hindi)</option>
+            </select>
+            <button class="slate-audio-btn btn-en" id="lb-btn-audio-other" title="ஒலி கேட்க">
+              🔊 Listen English
+            </button>
+          </div>
+          <div class="lightbox-content-box" id="lb-content-other">
+            <!-- Injected by app.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Lightbox Footer (Collapsible Summary & Vocab) -->
+      <div class="lightbox-footer-wrapper" id="lb-footer-wrapper">
+        <!-- Expandable Drawer for Summary & Vocab -->
+        <div class="lightbox-footer-drawer" id="lb-footer-drawer">
+          <div class="lightbox-vocab-summary" id="lb-vocab-summary">
+            <!-- Vocab & summary injected here -->
+          </div>
+        </div>
+
+        <!-- Sleek Single-Line Action Bar -->
+        <div class="lightbox-footer-bar">
+          <button class="lb-collapse-toggle-btn" id="lb-collapse-toggle-btn" title="கலைச்சொற்கள் மற்றும் குறிப்புகளை சுருக்கு / காட்டு">
+            <span id="lb-collapse-icon">✨</span>
+            <span id="lb-collapse-text">கலைச்சொற்கள் &amp; குறிப்பு (Vocab) ▲</span>
+          </button>
+
+          <div class="lightbox-footer-controls">
+            <button class="lb-nav-btn" id="lb-prev-btn" title="முந்தைய கதை">
+              ◀ முந்தையது (Prev)
+            </button>
+            <button class="lb-nav-btn" id="lb-next-btn" title="அடுத்தது (Next)">
+              அடுத்தது (Next) ▶
+            </button>
+            <button class="lb-close-action" id="lb-footer-close-btn" title="மூடுக">
+              மூடு (Close)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================================================
+       AI STORY GENERATOR MODAL (Generate Unlimited Custom Trilingual Stories)
+       ========================================================================== -->
+  <div class="ai-modal-overlay" id="aiModalOverlay" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="ai-modal-card">
+      <div class="ai-modal-header">
+        <div class="ai-modal-title-box">
+          <div class="ai-modal-badge">✨ Client-Side Story Engine</div>
+          <h2>AI Trilingual Story Generator</h2>
+          <p>உங்களுக்கு பிடித்த எந்த தலைப்பிலும் நொடியில் தமிழ் + ஆங்கில கதைகளை உருவாக்குங்கள்</p>
+        </div>
+        <button class="ai-modal-close-btn" id="aiModalCloseBtn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <div class="ai-modal-body">
+        <!-- Topic Input -->
+        <div class="ai-input-group">
+          <label for="aiTopicInput">Enter Story Scenario / Topic (கதை தலைப்பு):</label>
+          <input type="text" id="aiTopicInput" placeholder="e.g. Ramayana, Mahabharata, Airport travel, Salary raise, Habit building...">
+        </div>
+
+        <!-- Quick Idea Chips -->
+        <div class="ai-presets-row">
+          <span class="preset-label">Quick Ideas:</span>
+          <button class="btn-preset" data-topic="Ramayana">🏹 Ramayana</button>
+          <button class="btn-preset" data-topic="Mahabharata">🎯 Mahabharata</button>
+          <button class="btn-preset" data-topic="small boy">👦 Small Boy's Courage</button>
+          <button class="btn-preset" data-topic="rescuing a lost puppy">🐕 The Lost Puppy</button>
+          <button class="btn-preset" data-topic="Salary raise negotiation and promotion">💼 Salary Raise</button>
+          <button class="btn-preset" data-topic="First flight international travel">✈️ First Flight</button>
+          <button class="btn-preset" data-topic="Overcoming procrastination and building focus">⚡ Beating Procrastination</button>
+          <button class="btn-preset" data-topic="Coffee shop meeting with a mentor">☕ Mentor Chat</button>
+        </div>
+
+        <!-- Category & Icon Selection -->
+        <div class="ai-input-row">
+          <div class="ai-input-col">
+            <label for="aiCategorySelect">Category (பிரிவு):</label>
+            <select id="aiCategorySelect" class="ai-select">
+              <option value="Inspiration & Wisdom">Inspiration & Wisdom</option>
+              <option value="Daily Life & Practical Conversations">Daily Life & Conversations</option>
+              <option value="Workplace & Career Mastery">Workplace & Career Mastery</option>
+              <option value="Travel & Global Adventures">Travel & Global Adventures</option>
+              <option value="Technology & Future">Technology & Future</option>
+              <option value="Social & Relationships">Social & Relationships</option>
+            </select>
+          </div>
+          <div class="ai-input-col">
+            <label for="aiIconSelect">Icon Theme:</label>
+            <select id="aiIconSelect" class="ai-select">
+              <option value="sparkles">✨ Sparkles / Inspiration</option>
+              <option value="heart">❤️ Human Bonds / Kindness</option>
+              <option value="briefcase">💼 Career / Work</option>
+              <option value="coffee">☕ Daily Life / Café</option>
+              <option value="compass">🧭 Travel / Adventure</option>
+              <option value="cpu">🤖 Technology / Future</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- AI Generating Progress Status -->
+        <div id="aiGeneratingStatus" class="ai-generating-status" style="display: none;">
+          <div class="ai-spinner"></div>
+          <div class="ai-status-text">
+            <strong id="aiStatusStep">Creating Authentic Story with AI...</strong>
+            <span id="aiStatusDesc">Weaving natural Tamil narrative & dual-level English alignments...</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="ai-action-buttons">
+          <button id="btnGenerateStoryProcedural" class="btn-generate-primary" type="button">
+            <span id="btnGenerateStoryText">✨ Generate Trilingual Story with AI</span>
+            <small id="btnGenerateStorySubtext">Real AI Storyteller &bull; Authentic Tamil &bull; 100% Free</small>
+          </button>
+          <button id="btnCopyLlmPrompt" class="btn-copy-prompt" type="button" title="Copy structured prompt for external LLM">
+            <span>📋 Copy AI Prompt (for ChatGPT / Gemini / Claude)</span>
+          </button>
+        </div>
+
+        <!-- Prompt Copied Notification -->
+        <div id="aiPromptCopiedNotice" class="ai-notice-box" style="display: none;">
+          ✅ AI prompt copied to clipboard! Paste into ChatGPT/Claude to generate, then paste the JSON below.
+        </div>
+
+        <!-- Optional Gemini API Key Drawer -->
+        <details class="ai-api-key-details" id="aiApiKeyDetails">
+          <summary>🔑 AI Engine Settings & Gemini API Key (Optional)</summary>
+          <div class="ai-api-key-content">
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">
+              By default, real online AI is used automatically with zero setup. You can also paste your Google Gemini API key to use direct Gemini 2.0 Flash generation (saved locally in your browser):
+            </p>
+            <div class="ai-key-input-row">
+              <input type="password" id="geminiApiKeyInput" placeholder="Paste your Gemini API key (AIzaSy...)" autocomplete="off">
+              <button id="btnSaveGeminiKey" class="btn-save-key" type="button">Save Key</button>
+              <button id="btnClearGeminiKey" class="btn-clear-key" type="button" title="Remove saved key">Remove</button>
+            </div>
+            <small id="geminiKeyStatus" style="color: #6ee7b7; font-size: 0.75rem; display: none;">✅ Gemini API key saved in local browser!</small>
+          </div>
+        </details>
+
+        <!-- Custom JSON Import Section -->
+        <details class="ai-import-details">
+          <summary>📥 Paste / Import Custom JSON Story (Optional)</summary>
+          <div class="ai-import-content">
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">
+              You can paste any custom or AI-generated story object matching the STORIES_DATA format:
+            </p>
+            <textarea id="aiJsonImportTextarea" placeholder='{"id": "my-custom-story", "title": {"tamil": "...", "normal": "...", "advanced": "..."}, ...}' rows="4"></textarea>
+            <button id="btnImportJsonStory" class="btn-import-submit">Import to My Library</button>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Jump to Topics Button -->
+  <button id="floatingJumpToTopicsBtn" class="floating-jump-btn" type="button" title="Back up to topic cards" aria-label="Back to topics">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>
+    <span>Topics Shelf</span>
+  </button>
+
+  <!-- Scripts -->
+  <script src="assets/js/stories.js?v=2.9"></script>
+  <script src="assets/js/app.js?v=2.9"></script>
+</body>
+</html>
