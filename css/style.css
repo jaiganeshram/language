@@ -3154,14 +3154,15 @@ body {
   color: #0f172a;
 }
 
-/* Lightbox Line-by-Line Sentence Cards */
+/* Lightbox Line-by-Line Reading Flow (Clean, Borderless, Generous Line-to-Line Spacing) */
 .lightbox-content-box .lb-sentence {
   display: block;
-  margin-bottom: 1rem;
-  padding: 0.85rem 1rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 1.25rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
   position: relative;
@@ -3169,26 +3170,49 @@ body {
 }
 
 [data-theme="light"] .lightbox-content-box .lb-sentence {
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: transparent;
+  border: 1px solid transparent;
+  border-left: 3px solid transparent;
 }
 
 .lightbox-content-box .lb-sentence:hover {
-  background: rgba(6, 182, 212, 0.07);
-  border-color: rgba(6, 182, 212, 0.45);
-  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.04);
+  border-left: 3px solid rgba(6, 182, 212, 0.45);
+}
+
+[data-theme="light"] .lightbox-content-box .lb-sentence:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-left: 3px solid rgba(2, 132, 199, 0.45);
 }
 
 .lightbox-content-box .lb-sentence.synced-highlight {
-  background: rgba(6, 182, 212, 0.16) !important;
-  border-color: #06b6d4 !important;
-  box-shadow: 0 0 14px rgba(6, 182, 212, 0.35);
+  background: rgba(6, 182, 212, 0.12) !important;
+  border-color: transparent !important;
+  border-left: 3px solid #06b6d4 !important;
+  box-shadow: none !important;
+  border-radius: 0 6px 6px 0;
+}
+
+[data-theme="light"] .lightbox-content-box .lb-sentence.synced-highlight {
+  background: rgba(6, 182, 212, 0.08) !important;
+  border-color: transparent !important;
+  border-left: 3px solid #0284c7 !important;
+  box-shadow: none !important;
 }
 
 .lightbox-content-box .lb-sentence.synced-active-speaking {
-  background: rgba(245, 158, 11, 0.22) !important;
-  border-color: #f59e0b !important;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.16) !important;
+  border-color: transparent !important;
+  border-left: 3px solid #f59e0b !important;
+  box-shadow: none !important;
+  border-radius: 0 6px 6px 0;
+}
+
+[data-theme="light"] .lightbox-content-box .lb-sentence.synced-active-speaking {
+  background: rgba(245, 158, 11, 0.1) !important;
+  border-color: transparent !important;
+  border-left: 3px solid #d97706 !important;
+  box-shadow: none !important;
 }
 
 .lightbox-content-box .sentence-ta {
