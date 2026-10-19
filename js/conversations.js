@@ -514,8 +514,7 @@ class ConversationsApp {
         <div class="text-tamil-body">
           ${convo.dialogues.map((d, idx) => `
             <div class="lb-sentence sentence-ta" data-line-index="${idx}" title="Click to listen line in Tamil">
-              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.3rem;">
-                <span class="line-num-badge">${idx + 1}</span>
+              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
                 <span class="convo-speaker-tag ${d.speakerRole === 'user' ? 'speaker-user' : 'speaker-other'}">${this.escapeHtml(d.speaker)}</span>
               </div>
               <div class="sentence-ta-text">${this.escapeHtml(d.tamil)}</div>
@@ -585,8 +584,7 @@ class ConversationsApp {
         <div class="text-english-body">
           ${convo.dialogues.map((d, idx) => `
             <div class="lb-sentence sentence-en" data-line-index="${idx}" title="Click to listen line in English">
-              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.3rem;">
-                <span class="line-num-badge">${idx + 1}</span>
+              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
                 <span class="convo-speaker-tag ${d.speakerRole === 'user' ? 'speaker-user' : 'speaker-other'}">${this.escapeHtml(d.speaker)}</span>
               </div>
               <div class="english-line-text">${this.escapeHtml(d.english)}</div>
@@ -602,8 +600,7 @@ class ConversationsApp {
         <div class="text-telugu-body">
           ${convo.dialogues.map((d, idx) => `
             <div class="lb-sentence sentence-te" data-line-index="${idx}" title="Click to listen line in Telugu">
-              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.3rem;">
-                <span class="line-num-badge">${idx + 1}</span>
+              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
                 <span class="convo-speaker-tag ${d.speakerRole === 'user' ? 'speaker-user' : 'speaker-other'}">${this.escapeHtml(d.speaker)}</span>
               </div>
               <div class="speak-tamil-bold">${this.escapeHtml(d.teluguSpeak)}</div>
@@ -620,8 +617,7 @@ class ConversationsApp {
         <div class="text-kannada-body">
           ${convo.dialogues.map((d, idx) => `
             <div class="lb-sentence sentence-kn" data-line-index="${idx}" title="Click to listen line in Kannada">
-              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.3rem;">
-                <span class="line-num-badge">${idx + 1}</span>
+              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
                 <span class="convo-speaker-tag ${d.speakerRole === 'user' ? 'speaker-user' : 'speaker-other'}">${this.escapeHtml(d.speaker)}</span>
               </div>
               <div class="speak-tamil-bold">${this.escapeHtml(d.kannadaSpeak)}</div>
@@ -638,8 +634,7 @@ class ConversationsApp {
         <div class="text-hindi-body">
           ${convo.dialogues.map((d, idx) => `
             <div class="lb-sentence sentence-hi" data-line-index="${idx}" title="Click to listen line in Hindi">
-              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.3rem;">
-                <span class="line-num-badge">${idx + 1}</span>
+              <div style="display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.35rem;">
                 <span class="convo-speaker-tag ${d.speakerRole === 'user' ? 'speaker-user' : 'speaker-other'}">${this.escapeHtml(d.speaker)}</span>
               </div>
               <div class="speak-tamil-bold">${this.escapeHtml(d.hindiSpeak)}</div>
@@ -728,15 +723,15 @@ class ConversationsApp {
       subFallback = text;
     } else if (lang === 'telugu') {
       text = d.teluguScript || d.teluguSpeak;
-      subFallback = d.teluguSub || d.teluguSpeak;
+      subFallback = d.teluguSpeak || d.teluguSub;
       langCode = 'te-IN';
     } else if (lang === 'kannada') {
       text = d.kannadaScript || d.kannadaSpeak;
-      subFallback = d.kannadaSub || d.kannadaSpeak;
+      subFallback = d.kannadaSpeak || d.kannadaSub;
       langCode = 'kn-IN';
     } else if (lang === 'hindi') {
       text = d.hindiScript || d.hindiSpeak;
-      subFallback = d.hindiSub || d.hindiSpeak;
+      subFallback = d.hindiSpeak || d.hindiSub;
       langCode = 'hi-IN';
     }
 
@@ -800,13 +795,13 @@ class ConversationsApp {
       sub = d.english;
     } else if (this.lightboxPlayLang === 'te-IN') {
       text = d.teluguScript || d.teluguSpeak;
-      sub = d.teluguSub || d.teluguSpeak;
+      sub = d.teluguSpeak || d.teluguSub;
     } else if (this.lightboxPlayLang === 'kn-IN') {
       text = d.kannadaScript || d.kannadaSpeak;
-      sub = d.kannadaSub || d.kannadaSpeak;
+      sub = d.kannadaSpeak || d.kannadaSub;
     } else if (this.lightboxPlayLang === 'hi-IN') {
       text = d.hindiScript || d.hindiSpeak;
-      sub = d.hindiSub || d.hindiSpeak;
+      sub = d.hindiSpeak || d.hindiSub;
     }
 
     this.speak(text, this.lightboxPlayLang, sub);

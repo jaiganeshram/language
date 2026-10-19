@@ -715,10 +715,7 @@ class StoriesApp {
         <div class="text-tamil-body">
           ${story.lines.map((line, idx) => `
             <div class="lb-sentence sentence-ta" data-line-index="${idx}" title="Click to listen line in Tamil">
-              <div style="display: flex; align-items: baseline;">
-                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
-                <span class="sentence-ta-text">${this.escapeHtml(line.tamil)}</span>
-              </div>
+              <div class="sentence-ta-text">${this.escapeHtml(line.tamil)}</div>
             </div>
           `).join('')}
         </div>
@@ -785,10 +782,7 @@ class StoriesApp {
         <div class="text-english-body">
           ${story.lines.map((line, idx) => `
             <div class="lb-sentence sentence-en" data-line-index="${idx}" title="Click to listen line in English">
-              <div style="display: flex; align-items: baseline;">
-                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
-                <span class="english-line-text">${this.escapeHtml(line.english)}</span>
-              </div>
+              <div class="english-line-text">${this.escapeHtml(line.english)}</div>
             </div>
           `).join('')}
         </div>
@@ -801,11 +795,8 @@ class StoriesApp {
         <div class="text-telugu-body">
           ${story.lines.map((line, idx) => `
             <div class="lb-sentence sentence-te" data-line-index="${idx}" title="Click to listen line in Telugu">
-              <div style="display: flex; align-items: baseline;">
-                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
-                <div class="speak-tamil-bold">${this.escapeHtml(line.teluguSpeak)}</div>
-              </div>
-              ${line.teluguSub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(line.teluguSub)})</div>` : ''}
+              <div class="speak-tamil-bold">${this.escapeHtml(line.teluguSpeak)}</div>
+              ${line.teluguSub ? `<div class="speak-en-sub phonetic-sub">(${this.escapeHtml(line.teluguSub)})</div>` : ''}
             </div>
           `).join('')}
         </div>
@@ -818,11 +809,8 @@ class StoriesApp {
         <div class="text-kannada-body">
           ${story.lines.map((line, idx) => `
             <div class="lb-sentence sentence-kn" data-line-index="${idx}" title="Click to listen line in Kannada">
-              <div style="display: flex; align-items: baseline;">
-                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
-                <div class="speak-tamil-bold">${this.escapeHtml(line.kannadaSpeak)}</div>
-              </div>
-              ${line.kannadaSub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(line.kannadaSub)})</div>` : ''}
+              <div class="speak-tamil-bold">${this.escapeHtml(line.kannadaSpeak)}</div>
+              ${line.kannadaSub ? `<div class="speak-en-sub phonetic-sub">(${this.escapeHtml(line.kannadaSub)})</div>` : ''}
             </div>
           `).join('')}
         </div>
@@ -835,11 +823,8 @@ class StoriesApp {
         <div class="text-hindi-body">
           ${story.lines.map((line, idx) => `
             <div class="lb-sentence sentence-hi" data-line-index="${idx}" title="Click to listen line in Hindi">
-              <div style="display: flex; align-items: baseline;">
-                <span class="line-num-badge">${line.lineNum || (idx + 1)}</span>
-                <div class="speak-tamil-bold">${this.escapeHtml(line.hindiSpeak)}</div>
-              </div>
-              ${line.hindiSub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(line.hindiSub)})</div>` : ''}
+              <div class="speak-tamil-bold">${this.escapeHtml(line.hindiSpeak)}</div>
+              ${line.hindiSub ? `<div class="speak-en-sub phonetic-sub">(${this.escapeHtml(line.hindiSub)})</div>` : ''}
             </div>
           `).join('')}
         </div>
@@ -924,15 +909,15 @@ class StoriesApp {
       subFallback = text;
     } else if (lang === 'telugu') {
       text = line.teluguScript || line.teluguSpeak;
-      subFallback = line.teluguSub || line.teluguSpeak;
+      subFallback = line.teluguSpeak || line.teluguSub;
       langCode = 'te-IN';
     } else if (lang === 'kannada') {
       text = line.kannadaScript || line.kannadaSpeak;
-      subFallback = line.kannadaSub || line.kannadaSpeak;
+      subFallback = line.kannadaSpeak || line.kannadaSub;
       langCode = 'kn-IN';
     } else if (lang === 'hindi') {
       text = line.hindiScript || line.hindiSpeak;
-      subFallback = line.hindiSub || line.hindiSpeak;
+      subFallback = line.hindiSpeak || line.hindiSub;
       langCode = 'hi-IN';
     }
 
@@ -997,13 +982,13 @@ class StoriesApp {
       sub = line.english;
     } else if (this.lightboxPlayLang === 'te-IN') {
       text = line.teluguScript || line.teluguSpeak;
-      sub = line.teluguSub || line.teluguSpeak;
+      sub = line.teluguSpeak || line.teluguSub;
     } else if (this.lightboxPlayLang === 'kn-IN') {
       text = line.kannadaScript || line.kannadaSpeak;
-      sub = line.kannadaSub || line.kannadaSpeak;
+      sub = line.kannadaSpeak || line.kannadaSub;
     } else if (this.lightboxPlayLang === 'hi-IN') {
       text = line.hindiScript || line.hindiSpeak;
-      sub = line.hindiSub || line.hindiSpeak;
+      sub = line.hindiSpeak || line.hindiSub;
     }
 
     this.speak(text, this.lightboxPlayLang, sub);

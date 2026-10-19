@@ -873,10 +873,7 @@ class ShortDescriptionsApp {
         <div class="text-tamil-body">
           ${taLines.map((line, idx) => `
             <div class="lb-sentence sentence-ta" data-line-index="${idx}" title="Click to listen line in Tamil">
-              <div style="display: flex; align-items: baseline;">
-                <span class="line-num-badge">${idx + 1}</span>
-                <span class="sentence-ta-text">${this.escapeHtml(line)}</span>
-              </div>
+              <div class="sentence-ta-text">${this.escapeHtml(line)}</div>
             </div>
           `).join('')}
         </div>
@@ -964,10 +961,7 @@ class ShortDescriptionsApp {
         <div class="text-english-body">
           ${enLines.map((line, idx) => `
             <div class="lb-sentence sentence-en" data-line-index="${idx}" title="Click to listen line in English">
-              <div style="display: flex; align-items: baseline;">
-                <span class="line-num-badge">${idx + 1}</span>
-                <div class="english-line-text">${this.escapeHtml(line)}</div>
-              </div>
+              <div class="english-line-text">${this.escapeHtml(line)}</div>
             </div>
           `).join('')}
         </div>
@@ -984,11 +978,8 @@ class ShortDescriptionsApp {
             const sub = teSub[idx] || '';
             return `
               <div class="lb-sentence sentence-te" data-line-index="${idx}" title="Click to listen line in Telugu">
-                <div style="display: flex; align-items: baseline;">
-                  <span class="line-num-badge">${idx + 1}</span>
-                  <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
-                </div>
-                ${sub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(sub)})</div>` : ''}
+                <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
+                ${sub ? `<div class="speak-en-sub phonetic-sub">(${this.escapeHtml(sub)})</div>` : ''}
               </div>
             `;
           }).join('')}
@@ -1006,11 +997,8 @@ class ShortDescriptionsApp {
             const sub = knSub[idx] || '';
             return `
               <div class="lb-sentence sentence-kn" data-line-index="${idx}" title="Click to listen line in Kannada">
-                <div style="display: flex; align-items: baseline;">
-                  <span class="line-num-badge">${idx + 1}</span>
-                  <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
-                </div>
-                ${sub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(sub)})</div>` : ''}
+                <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
+                ${sub ? `<div class="speak-en-sub phonetic-sub">(${this.escapeHtml(sub)})</div>` : ''}
               </div>
             `;
           }).join('')}
@@ -1028,11 +1016,8 @@ class ShortDescriptionsApp {
             const sub = hiSub[idx] || '';
             return `
               <div class="lb-sentence sentence-hi" data-line-index="${idx}" title="Click to listen line in Hindi">
-                <div style="display: flex; align-items: baseline;">
-                  <span class="line-num-badge">${idx + 1}</span>
-                  <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
-                </div>
-                ${sub ? `<div class="speak-en-sub phonetic-sub" style="margin-left: 28px !important;">(${this.escapeHtml(sub)})</div>` : ''}
+                <div class="speak-tamil-bold">${this.escapeHtml(speak)}</div>
+                ${sub ? `<div class="speak-en-sub phonetic-sub">(${this.escapeHtml(sub)})</div>` : ''}
               </div>
             `;
           }).join('')}
@@ -1122,21 +1107,21 @@ class ShortDescriptionsApp {
       const speaks = this.splitSentences(story.fullTeluguSpeak);
       const subs = this.splitSentences(story.fullTeluguSub);
       text = scripts[lineIdx] || speaks[lineIdx] || '';
-      subFallback = subs[lineIdx] || speaks[lineIdx] || '';
+      subFallback = speaks[lineIdx] || subs[lineIdx] || '';
       langCode = 'te-IN';
     } else if (lang === 'kannada') {
       const scripts = this.splitSentences(story.fullKannadaScript);
       const speaks = this.splitSentences(story.fullKannadaSpeak);
       const subs = this.splitSentences(story.fullKannadaSub);
       text = scripts[lineIdx] || speaks[lineIdx] || '';
-      subFallback = subs[lineIdx] || speaks[lineIdx] || '';
+      subFallback = speaks[lineIdx] || subs[lineIdx] || '';
       langCode = 'kn-IN';
     } else if (lang === 'hindi') {
       const scripts = this.splitSentences(story.fullHindiScript);
       const speaks = this.splitSentences(story.fullHindiSpeak);
       const subs = this.splitSentences(story.fullHindiSub);
       text = scripts[lineIdx] || speaks[lineIdx] || '';
-      subFallback = subs[lineIdx] || speaks[lineIdx] || '';
+      subFallback = speaks[lineIdx] || subs[lineIdx] || '';
       langCode = 'hi-IN';
     }
 
@@ -1171,13 +1156,13 @@ class ShortDescriptionsApp {
       subs = lines;
     } else if (targetLang === 'te-IN') {
       lines = this.splitSentences(story.fullTeluguScript || story.fullTeluguSpeak);
-      subs = this.splitSentences(story.fullTeluguSub || story.fullTeluguSpeak);
+      subs = this.splitSentences(story.fullTeluguSpeak || story.fullTeluguSub);
     } else if (targetLang === 'kn-IN') {
       lines = this.splitSentences(story.fullKannadaScript || story.fullKannadaSpeak);
-      subs = this.splitSentences(story.fullKannadaSub || story.fullKannadaSpeak);
+      subs = this.splitSentences(story.fullKannadaSpeak || story.fullKannadaSub);
     } else if (targetLang === 'hi-IN') {
       lines = this.splitSentences(story.fullHindiScript || story.fullHindiSpeak);
-      subs = this.splitSentences(story.fullHindiSub || story.fullHindiSpeak);
+      subs = this.splitSentences(story.fullHindiSpeak || story.fullHindiSub);
     }
 
     this.lightboxPlayLines = lines;

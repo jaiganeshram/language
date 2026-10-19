@@ -1027,6 +1027,10 @@ function updateSentenceMode() {
 function speakCustomWord(text, lang) {
   stopSpeech();
   if (!text) return;
+  if (window.bhashaAudio) {
+    window.bhashaAudio.speak(text, lang);
+    return;
+  }
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = currentSpeechRate;
   const voices = synth.getVoices();
@@ -1445,6 +1449,17 @@ function speakSingleLine(lineIndex, speakType) {
   activeSpeechIndex = lineIndex;
   highlightSpeakingLine(lineIndex);
 
+  if (window.bhashaAudio) {
+    const phoneticFallback = (mode === 'telugu' ? (lineItem.teluguSpeak || lineItem.teluguSub) :
+                              (mode === 'kannada' ? (lineItem.kannadaSpeak || lineItem.kannadaSub) :
+                              (mode === 'hindi' ? (lineItem.hindiSpeak || lineItem.hindiSub) : ''))) || '';
+    window.bhashaAudio.speak(text, lang, phoneticFallback, null, null, () => {
+      clearSpeakingLine();
+      activeSpeechIndex = -1;
+    });
+    return;
+  }
+
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = currentSpeechRate;
   utterance.lang = lang;
@@ -1485,6 +1500,20 @@ function speakFullStoryFromIndex(startIndex, forceMode) {
 
   const { text, lang, voice } = resolveVoiceAndText(lineItem, targetMode);
 
+  if (window.bhashaAudio) {
+    const phoneticFallback = (targetMode === 'telugu' ? (lineItem.teluguSpeak || lineItem.teluguSub) :
+                              (targetMode === 'kannada' ? (lineItem.kannadaSpeak || lineItem.kannadaSub) :
+                              (targetMode === 'hindi' ? (lineItem.hindiSpeak || lineItem.hindiSub) : ''))) || '';
+    window.bhashaAudio.speak(text, lang, phoneticFallback, null, null, () => {
+      if (isPlayingAll) {
+        speechNextTimer = setTimeout(() => {
+          speakFullStoryFromIndex(startIndex + 1, forceMode);
+        }, 350);
+      }
+    });
+    return;
+  }
+
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = currentSpeechRate;
   utterance.lang = lang;
@@ -1513,7 +1542,10 @@ function stopSpeech() {
     clearTimeout(speechNextTimer);
     speechNextTimer = null;
   }
-  if (synth.speaking || synth.pending) {
+  if (window.bhashaAudio) {
+    window.bhashaAudio.stop();
+  }
+  if (synth && (synth.speaking || synth.pending)) {
     synth.cancel();
   }
   isPlayingAll = false;
