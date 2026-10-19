@@ -268,6 +268,101 @@ body {
   box-shadow: 0 6px 18px rgba(99, 102, 241, 0.4);
 }
 
+/* Page Navigation Bar (Universal 6-Tab Navigation) */
+.page-nav-bar {
+  background: rgba(15, 23, 42, 0.88);
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  padding: 0.55rem 1.5rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: sticky;
+  top: 57px;
+  z-index: 90;
+}
+
+[data-theme="light"] .page-nav-bar {
+  background: #f1f5f9;
+  border-bottom-color: #cbd5e1;
+}
+
+.nav-container {
+  max-width: 1540px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.page-nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 1.15rem;
+  border-radius: 9999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  font-family: var(--font-ta, 'Anek Tamil'), sans-serif;
+  text-decoration: none;
+  color: var(--text-secondary, #94a3b8);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  transition: all 0.2s ease;
+}
+
+.page-nav-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary, #ffffff);
+  transform: translateY(-1px);
+}
+
+.page-nav-item.active {
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  color: #ffffff;
+  border-color: #f43f5e;
+  box-shadow: 0 3px 12px rgba(244, 63, 94, 0.35);
+}
+
+[data-theme="light"] .page-nav-item {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+[data-theme="light"] .page-nav-item.active {
+  background: linear-gradient(135deg, #f43f5e, #be123c);
+  color: #ffffff;
+}
+
+@media (max-width: 850px) {
+  .page-nav-bar {
+    position: relative;
+    top: auto;
+    padding: 0.45rem 0.75rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .page-nav-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    width: max-content;
+  }
+
+  .page-nav-item {
+    width: auto;
+    white-space: nowrap;
+    font-size: 0.82rem;
+    padding: 0.45rem 1rem;
+    text-align: center;
+    flex-shrink: 0;
+  }
+}
+
 /* Main Container */
 .main-wrapper {
   max-width: 1540px;

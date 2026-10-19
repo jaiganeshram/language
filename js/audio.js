@@ -7,11 +7,12 @@ class BhashaAudio {
     this.synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
     this.voices = [];
     this.audioCtx = null;
-    this.speechRate = 0.95; // Crisp, natural learning speed
+    this.speechRate = 0.88; // Natural, clear learning speed
     this.currentAudio = null;
     this.activeSessionId = 0;
     this.isUnlocked = false;
-    this.resumeInterval = null;
+    this.watchdogTimer = null;
+    this.cloudTtsDisabled = false;
 
     if (this.synth) {
       this.loadVoices();
@@ -80,7 +81,7 @@ class BhashaAudio {
 
   normalizeLang(langCode) {
     if (!langCode) return { short: 'en', full: 'en-US' };
-    const l = String(langCode).trim().toLowerCase();
+    const l = String(langCode).trim().toLowerCase().replace(/_/g, '-');
     if (l === 'tamil' || l === 'ta' || l.startsWith('ta')) return { short: 'ta', full: 'ta-IN' };
     if (l === 'telugu' || l === 'te' || l.startsWith('te')) return { short: 'te', full: 'te-IN' };
     if (l === 'kannada' || l === 'kn' || l.startsWith('kn')) return { short: 'kn', full: 'kn-IN' };
@@ -96,9 +97,9 @@ class BhashaAudio {
 
     const { short, full } = this.normalizeLang(langCode);
 
-    // 1. Natural / Neural / Online / Google voices matching prefix
+    // 1. Natural / Neural / Online / Google voices matching prefix or full code
     let matched = this.voices.find(v => {
-      const vl = (v.lang || '').toLowerCase();
+      const vl = (v.lang || '').toLowerCase().replace(/_/g, '-');
       const vn = (v.name || '').toLowerCase();
       const isLang = vl === full.toLowerCase() || vl.startsWith(short);
       return isLang && (vn.includes('natural') || vn.includes('neural') || vn.includes('online') || vn.includes('google'));
@@ -106,18 +107,33 @@ class BhashaAudio {
     if (matched) return matched;
 
     // 2. Exact language locale match (e.g. ta-IN, te-IN, kn-IN, hi-IN, en-US)
-    matched = this.voices.find(v => (v.lang || '').toLowerCase() === full.toLowerCase());
+    matched = this.voices.find(v => {
+      const vl = (v.lang || '').toLowerCase().replace(/_/g, '-');
+      return vl === full.toLowerCase();
+    });
     if (matched) return matched;
 
     // 3. Language prefix match (e.g. ta, te, kn, hi, en)
-    matched = this.voices.find(v => (v.lang || '').toLowerCase().startsWith(short));
+    matched = this.voices.find(v => {
+      const vl = (v.lang || '').toLowerCase().replace(/_/g, '-');
+      return vl.startsWith(short);
+    });
     if (matched) return matched;
 
     // 4. Voice name contains language name
-    const langNames = { te: 'telugu', kn: 'kannada', hi: 'hindi', ta: 'tamil', en: 'english' };
-    const targetName = langNames[short];
-    if (targetName) {
-      matched = this.voices.find(v => (v.name || '').toLowerCase().includes(targetName));
+    const langNames = {
+      te: ['telugu'],
+      kn: ['kannada'],
+      hi: ['hindi'],
+      ta: ['tamil'],
+      en: ['english']
+    };
+    const targetKeywords = langNames[short];
+    if (targetKeywords) {
+      matched = this.voices.find(v => {
+        const vn = (v.name || '').toLowerCase();
+        return targetKeywords.some(kw => vn.includes(kw));
+      });
       if (matched) return matched;
     }
 
@@ -129,7 +145,6 @@ class BhashaAudio {
     const clean = text.replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ').trim();
     if (clean.length <= maxLength) return [clean];
 
-    // Split on sentence punctuation or commas/clauses
     const rawTokens = clean.match(/[^.!?|;]+[.!?|;]*/g) || [clean];
     const chunks = [];
     let currentChunk = '';
@@ -145,7 +160,6 @@ class BhashaAudio {
         if (t.length <= maxLength) {
           currentChunk = t;
         } else {
-          // Token itself is too long, split by comma or words
           const subTokens = t.match(/[^,]+,*|\S+/g) || [t];
           let subChunk = '';
           for (const sub of subTokens) {
@@ -166,103 +180,9 @@ class BhashaAudio {
     return chunks;
   }
 
-  // --- Primary Audio: Studio-Quality Natural Cloud Audio ---
-  playNaturalAudio(text, langShort, btnEl, onStart, onEnd, onFallback) {
-    const sessionId = ++this.activeSessionId;
-    const chunks = this.splitIntoChunks(text, 160);
-    if (chunks.length === 0) {
-      if (btnEl) btnEl.classList.remove('audio-playing');
-      if (onEnd) onEnd();
-      return;
-    }
-
-    if (btnEl) btnEl.classList.add('audio-playing');
-    if (onStart) onStart();
-
-    const audioA = new Audio();
-    const audioB = new Audio();
-    try {
-      audioA.referrerPolicy = 'no-referrer';
-      audioB.referrerPolicy = 'no-referrer';
-    } catch (e) {}
-
-    audioA.playbackRate = this.speechRate;
-    audioB.playbackRate = this.speechRate;
-
-    this.currentAudio = audioA;
-
-    const cleanup = () => {
-      if (this.activeSessionId !== sessionId) return;
-      try {
-        audioA.pause();
-        audioA.src = '';
-        audioB.pause();
-        audioB.src = '';
-      } catch (e) {}
-      this.currentAudio = null;
-      if (btnEl) btnEl.classList.remove('audio-playing');
-      if (onEnd) onEnd();
-    };
-
-    const getUrl = (chunk) => {
-      return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(chunk)}&tl=${langShort}&client=tw-ob`;
-    };
-
-    const playChunk = (index) => {
-      if (this.activeSessionId !== sessionId) return;
-      if (index >= chunks.length) {
-        cleanup();
-        return;
-      }
-
-      const isEven = index % 2 === 0;
-      const player = isEven ? audioA : audioB;
-      const preloader = isEven ? audioB : audioA;
-
-      this.currentAudio = player;
-      player.playbackRate = this.speechRate;
-
-      const targetUrl = getUrl(chunks[index]);
-      if (player.src !== targetUrl) {
-        player.src = targetUrl;
-      }
-
-      // Preload next chunk on the alternate player for seamless gapless speech
-      if (index + 1 < chunks.length) {
-        preloader.src = getUrl(chunks[index + 1]);
-        try { preloader.load(); } catch (e) {}
-      }
-
-      player.onended = () => {
-        if (this.activeSessionId !== sessionId) return;
-        playChunk(index + 1);
-      };
-
-      player.onerror = (e) => {
-        console.warn('Natural Cloud Audio error, falling back to Web Speech:', e);
-        if (this.activeSessionId !== sessionId) return;
-        cleanup();
-        if (onFallback) onFallback();
-      };
-
-      const playPromise = player.play();
-      if (playPromise !== undefined) {
-        playPromise.catch((err) => {
-          console.warn('Audio play rejection, falling back to Web Speech:', err);
-          if (this.activeSessionId !== sessionId) return;
-          cleanup();
-          if (onFallback) onFallback();
-        });
-      }
-    };
-
-    playChunk(0);
-  }
-
-  // --- Secondary Fallback: Web Speech API ---
+  // --- Primary Audio: Web Speech API (Fast, local, offline, zero network error) ---
   speakWebSpeech(text, langFull, phoneticFallback = '', btnEl = null, onStart = null, onEnd = null) {
     if (!this.synth) {
-      console.warn('Speech synthesis not supported in this browser.');
       if (btnEl) btnEl.classList.remove('audio-playing');
       if (onEnd) onEnd();
       return;
@@ -274,6 +194,7 @@ class BhashaAudio {
       return;
     }
 
+    // Cancel any previous speech
     try {
       if (this.synth.paused) this.synth.resume();
       if (this.synth.speaking || this.synth.pending) {
@@ -286,7 +207,7 @@ class BhashaAudio {
     let actualLang = langFull;
     const { short } = this.normalizeLang(langFull);
 
-    // Fallback if client OS lacks native voice pack (e.g. Windows without Telugu / Kannada)
+    // Intelligent phonetic fallback if client OS lacks native voice pack
     if (!voice) {
       if (short === 'te' || short === 'kn') {
         const taVoice = this.getVoiceForLang('ta-IN');
@@ -336,6 +257,10 @@ class BhashaAudio {
     const finish = () => {
       if (isDone) return;
       isDone = true;
+      if (this.watchdogTimer) {
+        clearTimeout(this.watchdogTimer);
+        this.watchdogTimer = null;
+      }
       window._bhashaActiveUtterance = null;
       if (btnEl) btnEl.classList.remove('audio-playing');
       if (onEnd) onEnd();
@@ -348,13 +273,17 @@ class BhashaAudio {
 
     utterance.onend = finish;
     utterance.onerror = (e) => {
-      console.warn('SpeechSynthesis error:', e.error || e);
+      // Ignore 'interrupted' or 'canceled' when the user clicks another audio quickly
+      if (e.error !== 'interrupted' && e.error !== 'canceled') {
+        console.warn('SpeechSynthesis error:', e.error || e);
+      }
       finish();
     };
 
-    // Watchdog safety: clear playing state if browser hangs
-    const approxDurationMs = Math.max(2500, (textToSpeak.length * 90) / this.speechRate);
-    setTimeout(finish, approxDurationMs + 1200);
+    // Watchdog safety: clear playing state if browser speech synthesis hangs
+    const approxDurationMs = Math.max(2000, (textToSpeak.length * 90) / this.speechRate);
+    if (this.watchdogTimer) clearTimeout(this.watchdogTimer);
+    this.watchdogTimer = setTimeout(finish, approxDurationMs + 1000);
 
     setTimeout(() => {
       try {
@@ -366,10 +295,119 @@ class BhashaAudio {
         console.warn('SpeechSynthesis speak exception:', err);
         finish();
       }
-    }, 25);
+    }, 20);
   }
 
-  // --- Universal Speak Function (Natural Cloud Audio -> Web Speech API fallback) ---
+  // --- Fallback Audio: Cloud Audio (Safely guarded against recursion) ---
+  playNaturalAudio(text, langShort, btnEl, onStart, onEnd, onFallback) {
+    const sessionId = ++this.activeSessionId;
+    let isTerminated = false;
+
+    const chunks = this.splitIntoChunks(text, 160);
+    if (chunks.length === 0) {
+      if (btnEl) btnEl.classList.remove('audio-playing');
+      if (onEnd) onEnd();
+      return;
+    }
+
+    if (btnEl) btnEl.classList.add('audio-playing');
+    if (onStart) onStart();
+
+    const audioA = new Audio();
+    const audioB = new Audio();
+    try {
+      audioA.referrerPolicy = 'no-referrer';
+      audioB.referrerPolicy = 'no-referrer';
+    } catch (e) {}
+
+    audioA.playbackRate = this.speechRate;
+    audioB.playbackRate = this.speechRate;
+    this.currentAudio = audioA;
+
+    const cleanup = () => {
+      if (isTerminated || this.activeSessionId !== sessionId) return;
+      isTerminated = true;
+
+      // CRITICAL: Remove all event handlers BEFORE touching .src to prevent recursive onerror events
+      audioA.onerror = null;
+      audioA.onended = null;
+      audioA.oncanplay = null;
+      audioB.onerror = null;
+      audioB.onended = null;
+      audioB.oncanplay = null;
+
+      try {
+        audioA.pause();
+        audioA.removeAttribute('src');
+        audioA.load();
+        audioB.pause();
+        audioB.removeAttribute('src');
+        audioB.load();
+      } catch (e) {}
+
+      this.currentAudio = null;
+      if (btnEl) btnEl.classList.remove('audio-playing');
+      if (onEnd) onEnd();
+    };
+
+    const handleFailure = (err) => {
+      if (isTerminated || this.activeSessionId !== sessionId) return;
+      this.cloudTtsDisabled = true; // Mark as disabled to avoid repeated failed network requests
+      cleanup();
+      if (onFallback) {
+        onFallback();
+      }
+    };
+
+    const getUrl = (chunk) => {
+      return `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(chunk)}&tl=${langShort}&client=tw-ob`;
+    };
+
+    const playChunk = (index) => {
+      if (isTerminated || this.activeSessionId !== sessionId) return;
+      if (index >= chunks.length) {
+        cleanup();
+        return;
+      }
+
+      const isEven = index % 2 === 0;
+      const player = isEven ? audioA : audioB;
+      const preloader = isEven ? audioB : audioA;
+
+      this.currentAudio = player;
+      player.playbackRate = this.speechRate;
+
+      const targetUrl = getUrl(chunks[index]);
+      if (player.src !== targetUrl) {
+        player.src = targetUrl;
+      }
+
+      if (index + 1 < chunks.length) {
+        preloader.src = getUrl(chunks[index + 1]);
+        try { preloader.load(); } catch (e) {}
+      }
+
+      player.onended = () => {
+        if (isTerminated || this.activeSessionId !== sessionId) return;
+        playChunk(index + 1);
+      };
+
+      player.onerror = (e) => {
+        handleFailure(e);
+      };
+
+      const playPromise = player.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          handleFailure(err);
+        });
+      }
+    };
+
+    playChunk(0);
+  }
+
+  // --- Universal Speak Entrypoint ---
   speak(text, langCode = 'en-US', phoneticFallback = '', btnEl = null, onStart = null, onEnd = null) {
     // 1. Immediately stop any current audio/speech
     this.stop();
@@ -385,27 +423,41 @@ class BhashaAudio {
 
     const { short, full } = this.normalizeLang(langCode);
 
-    // 3. Play Natural Studio Audio first for authentic human pronunciation
-    this.playNaturalAudio(text, short, btnEl, onStart, onEnd, () => {
-      // 4. Fallback to Web Speech API if offline or blocked
+    // 3. Primary: High-fidelity Native Web Speech API
+    if (this.synth) {
       this.speakWebSpeech(text, full, phoneticFallback, btnEl, onStart, onEnd);
-    });
+      return;
+    }
+
+    // 4. Secondary: Cloud Audio (if SpeechSynthesis is absent from the browser)
+    if (!this.cloudTtsDisabled) {
+      this.playNaturalAudio(text, short, btnEl, onStart, onEnd, () => {
+        if (btnEl) btnEl.classList.remove('audio-playing');
+        if (onEnd) onEnd();
+      });
+    } else {
+      if (btnEl) btnEl.classList.remove('audio-playing');
+      if (onEnd) onEnd();
+    }
   }
 
   stop() {
     this.activeSessionId++;
-    if (this.currentAudio) {
-      try {
-        this.currentAudio.pause();
-        this.currentAudio.currentTime = 0;
-        this.currentAudio.src = '';
-        this.currentAudio = null;
-      } catch (e) {}
+
+    if (this.watchdogTimer) {
+      clearTimeout(this.watchdogTimer);
+      this.watchdogTimer = null;
     }
 
-    if (this.resumeInterval) {
-      clearInterval(this.resumeInterval);
-      this.resumeInterval = null;
+    if (this.currentAudio) {
+      try {
+        this.currentAudio.onerror = null;
+        this.currentAudio.onended = null;
+        this.currentAudio.pause();
+        this.currentAudio.removeAttribute('src');
+        this.currentAudio.load();
+      } catch (e) {}
+      this.currentAudio = null;
     }
 
     if (this.synth) {
@@ -448,29 +500,67 @@ class BhashaAudio {
         osc.type = 'sine';
         osc.frequency.setValueAtTime(640, now);
         osc.frequency.exponentialRampToValueAtTime(880, now + 0.05);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start(now);
-        osc.stop(now + 0.08);
-      } else if (type === 'success') {
+        osc.stop(now + 0.07);
+      } else if (type === 'success' || type === 'correct') {
         const osc1 = ctx.createOscillator();
         const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
         osc1.type = 'sine';
         osc2.type = 'sine';
         osc1.frequency.setValueAtTime(523.25, now); // C5
-        osc2.frequency.setValueAtTime(659.25, now + 0.1); // E5
-        gain.gain.setValueAtTime(0.18, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc2.frequency.setValueAtTime(659.25, now + 0.08); // E5
+        gain.gain.setValueAtTime(0.15, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
         osc1.connect(gain);
         osc2.connect(gain);
         gain.connect(ctx.destination);
         osc1.start(now);
-        osc1.stop(now + 0.12);
-        osc2.start(now + 0.1);
-        osc2.stop(now + 0.35);
+        osc1.stop(now + 0.1);
+        osc2.start(now + 0.08);
+        osc2.stop(now + 0.28);
+      } else if (type === 'wrong') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(220, now);
+        osc.frequency.linearRampToValueAtTime(160, now + 0.15);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      } else if (type === 'celebrate') {
+        const notes = [523.25, 659.25, 783.99, 1046.5]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+          gain.gain.setValueAtTime(0.12, now + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.15);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.06);
+          osc.stop(now + idx * 0.06 + 0.15);
+        });
+      } else if (type === 'flip') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(700, now + 0.04);
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
       }
     } catch (e) {
       console.warn('Audio FX error:', e);
@@ -481,6 +571,11 @@ class BhashaAudio {
 // Global Singleton Instance
 if (typeof window !== 'undefined') {
   window.bhashaAudio = new BhashaAudio();
+  window.addEventListener('beforeunload', () => {
+    if (window.bhashaAudio) {
+      window.bhashaAudio.stop();
+    }
+  });
 }
 
 if (typeof module !== 'undefined' && module.exports) {

@@ -690,10 +690,13 @@ class ShortDescriptionsApp {
       const safeTa = esc(story.fullTamil);
       const safeTe = esc(story.fullTeluguScript);
       const safeTeSub = esc(story.fullTeluguSub);
+      const safeTeSpeak = esc(story.fullTeluguSpeak);
       const safeKn = esc(story.fullKannadaScript);
       const safeKnSub = esc(story.fullKannadaSub);
+      const safeKnSpeak = esc(story.fullKannadaSpeak);
       const safeHi = esc(story.fullHindiScript);
       const safeHiSub = esc(story.fullHindiSub);
+      const safeHiSpeak = esc(story.fullHindiSpeak);
 
       const titleTa = story.titleTamil || story.title;
       const titleEn = story.titleEnglish || story.titleEn;
@@ -782,7 +785,7 @@ class ShortDescriptionsApp {
               <div class="slate-lang-section slate-te">
                 <div class="slate-section-header">
                   <span class="slate-lang-badge badge-te">தெலுங்கில் பேச (Telugu)</span>
-                  <button class="slate-audio-btn btn-te" onclick="window.shortDescApp.speak('${safeTe}', 'te-IN', '${safeTeSub}', this)" title="தெலுங்கில் முழுப் பத்தியையும் கேட்க">
+                  <button class="slate-audio-btn btn-te" onclick="window.shortDescApp.speak('${safeTe}', 'te-IN', '${safeTeSpeak}', this)" title="தெலுங்கில் முழுப் பத்தியையும் கேட்க">
                     🔊 தெலுங்கு ஒலி
                   </button>
                 </div>
@@ -796,7 +799,7 @@ class ShortDescriptionsApp {
               <div class="slate-lang-section slate-kn">
                 <div class="slate-section-header">
                   <span class="slate-lang-badge badge-kn">கன்னடத்தில் பேச (Kannada)</span>
-                  <button class="slate-audio-btn btn-kn" onclick="window.shortDescApp.speak('${safeKn}', 'kn-IN', '${safeKnSub}', this)" title="கன்னடத்தில் முழுப் பத்தியையும் கேட்க">
+                  <button class="slate-audio-btn btn-kn" onclick="window.shortDescApp.speak('${safeKn}', 'kn-IN', '${safeKnSpeak}', this)" title="கன்னடத்தில் முழுப் பத்தியையும் கேட்க">
                     🔊 கன்னட ஒலி
                   </button>
                 </div>
@@ -810,7 +813,7 @@ class ShortDescriptionsApp {
               <div class="slate-lang-section slate-hi">
                 <div class="slate-section-header">
                   <span class="slate-lang-badge badge-hi">இந்தியில் பேச (Hindi)</span>
-                  <button class="slate-audio-btn btn-hi" onclick="window.shortDescApp.speak('${safeHi}', 'hi-IN', '${safeHiSub}', this)" title="இந்தியில் முழுப் பத்தியையும் கேட்க">
+                  <button class="slate-audio-btn btn-hi" onclick="window.shortDescApp.speak('${safeHi}', 'hi-IN', '${safeHiSpeak}', this)" title="இந்தியில் முழுப் பத்தியையும் கேட்க">
                     🔊 இந்தி ஒலி
                   </button>
                 </div>

@@ -496,10 +496,13 @@ class StoriesApp {
           const safeEn = esc(line.english);
           const safeTe = esc(line.teluguScript);
           const safeTeSub = esc(line.teluguSub);
+          const safeTeSpeak = esc(line.teluguSpeak);
           const safeKn = esc(line.kannadaScript);
           const safeKnSub = esc(line.kannadaSub);
+          const safeKnSpeak = esc(line.kannadaSpeak);
           const safeHi = esc(line.hindiScript);
           const safeHiSub = esc(line.hindiSub);
+          const safeHiSpeak = esc(line.hindiSpeak);
 
           return `
           <div class="story-line-card" id="line-card-${line.lineNum}">
@@ -535,7 +538,7 @@ class StoriesApp {
               <div class="story-lang-panel panel-telugu">
                 <div class="panel-lang-header">
                   <span class="panel-pill pill-te">தெலுங்கு</span>
-                  <button class="table-audio-btn btn-te" onclick="window.storyApp.speak('${safeTe}', 'te-IN', '${safeTeSub}', this)" title="தெலுங்கு ஒலி">
+                  <button class="table-audio-btn btn-te" onclick="window.storyApp.speak('${safeTe}', 'te-IN', '${safeTeSpeak}', this)" title="தெலுங்கு ஒலி">
                     🔊
                   </button>
                 </div>
@@ -549,7 +552,7 @@ class StoriesApp {
               <div class="story-lang-panel panel-kannada">
                 <div class="panel-lang-header">
                   <span class="panel-pill pill-kn">கன்னடம்</span>
-                  <button class="table-audio-btn btn-kn" onclick="window.storyApp.speak('${safeKn}', 'kn-IN', '${safeKnSub}', this)" title="கன்னட ஒலி">
+                  <button class="table-audio-btn btn-kn" onclick="window.storyApp.speak('${safeKn}', 'kn-IN', '${safeKnSpeak}', this)" title="கன்னட ஒலி">
                     🔊
                   </button>
                 </div>
@@ -563,7 +566,7 @@ class StoriesApp {
               <div class="story-lang-panel panel-hindi">
                 <div class="panel-lang-header">
                   <span class="panel-pill pill-hi">இந்தி</span>
-                  <button class="table-audio-btn btn-hi" onclick="window.storyApp.speak('${safeHi}', 'hi-IN', '${safeHiSub}', this)" title="இந்தி ஒலி">
+                  <button class="table-audio-btn btn-hi" onclick="window.storyApp.speak('${safeHi}', 'hi-IN', '${safeHiSpeak}', this)" title="இந்தி ஒலி">
                     🔊
                   </button>
                 </div>

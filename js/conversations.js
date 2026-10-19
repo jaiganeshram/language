@@ -373,10 +373,13 @@ class ConversationsApp {
                   const safeEn = esc(d.english);
                   const safeTe = esc(d.teluguScript);
                   const safeTeSub = esc(d.teluguSub);
+                  const safeTeSpeak = esc(d.teluguSpeak);
                   const safeKn = esc(d.kannadaScript);
                   const safeKnSub = esc(d.kannadaSub);
+                  const safeKnSpeak = esc(d.kannadaSpeak);
                   const safeHi = esc(d.hindiScript);
                   const safeHiSub = esc(d.hindiSub);
+                  const safeHiSpeak = esc(d.hindiSpeak);
 
                   return `
                   <tr class="table-row convo-row ${d.speakerRole === 'user' ? 'row-user-role' : 'row-other-role'}">
@@ -415,7 +418,7 @@ class ConversationsApp {
                           <span class="speak-tamil-bold">${d.teluguSpeak}</span>
                           <span class="phonetic-sub">(${d.teluguSub})</span>
                         </div>
-                        <button class="table-audio-btn btn-te" onclick="window.convoApp.speak('${safeTe}', 'te-IN', '${safeTeSub}', this)" title="தெலுங்கு ஒலி">
+                        <button class="table-audio-btn btn-te" onclick="window.convoApp.speak('${safeTe}', 'te-IN', '${safeTeSpeak}', this)" title="தெலுங்கு ஒலி">
                           🔊
                         </button>
                       </div>
@@ -429,7 +432,7 @@ class ConversationsApp {
                           <span class="speak-tamil-bold">${d.kannadaSpeak}</span>
                           <span class="phonetic-sub">(${d.kannadaSub})</span>
                         </div>
-                        <button class="table-audio-btn btn-kn" onclick="window.convoApp.speak('${safeKn}', 'kn-IN', '${safeKnSub}', this)" title="கன்னட ஒலி">
+                        <button class="table-audio-btn btn-kn" onclick="window.convoApp.speak('${safeKn}', 'kn-IN', '${safeKnSpeak}', this)" title="கன்னட ஒலி">
                           🔊
                         </button>
                       </div>
@@ -443,7 +446,7 @@ class ConversationsApp {
                           <span class="speak-tamil-bold">${d.hindiSpeak}</span>
                           <span class="phonetic-sub">(${d.hindiSub})</span>
                         </div>
-                        <button class="table-audio-btn btn-hi" onclick="window.convoApp.speak('${safeHi}', 'hi-IN', '${safeHiSub}', this)" title="இந்தி ஒலி">
+                        <button class="table-audio-btn btn-hi" onclick="window.convoApp.speak('${safeHi}', 'hi-IN', '${safeHiSpeak}', this)" title="இந்தி ஒலி">
                           🔊
                         </button>
                       </div>

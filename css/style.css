@@ -138,11 +138,21 @@ html {
   background-color: rgba(148, 163, 184, 0.75);
 }
 
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
   font-family: var(--font-base);
   background-color: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
+  min-height: 100dvh;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   background-image: 
@@ -517,8 +527,9 @@ body {
   border-color: #f43f5e !important;
 }
 
-/* Category Filter Bar */
-.category-filter-bar {
+/* Category & Topic Filter Bars */
+.category-filter-bar,
+.convo-topic-bar {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -1224,7 +1235,7 @@ body {
 @media (max-width: 850px) {
   /* Header tweaks */
   .app-header {
-    padding: 0.5rem 0.75rem;
+    padding: max(0.5rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right)) 0.5rem max(0.75rem, env(safe-area-inset-left));
   }
 
   .header-container {
@@ -1321,23 +1332,42 @@ body {
     font-size: 0.85rem;
   }
 
-  .category-filter-bar {
-    gap: 0.35rem;
+  .category-filter-bar,
+  .convo-topic-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.45rem;
+    padding-bottom: 0.4rem;
     margin-bottom: 1rem;
+    width: 100%;
+  }
+  .category-filter-bar::-webkit-scrollbar,
+  .convo-topic-bar::-webkit-scrollbar {
+    display: none;
   }
 
   .cat-filter-btn {
-    padding: 0.35rem 0.75rem;
-    font-size: 0.78rem;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.8rem;
+    min-height: 38px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Navigation Bar on Mobile - Native Touch Scrollable Pill Strip */
   .page-nav-bar {
     position: relative;
     top: auto;
-    padding: 0.45rem 0.75rem;
+    padding: 0.5rem 0.75rem;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
     scrollbar-width: none;
   }
   .page-nav-bar::-webkit-scrollbar {
@@ -1349,15 +1379,17 @@ body {
     flex-wrap: nowrap;
     gap: 0.5rem;
     width: max-content;
+    padding-right: 1rem;
   }
 
   .page-nav-item {
     width: auto;
     white-space: nowrap;
-    font-size: 0.82rem;
-    padding: 0.45rem 1rem;
+    font-size: 0.84rem;
+    padding: 0.48rem 1rem;
     text-align: center;
     flex-shrink: 0;
+    min-height: 38px;
   }
 
   /* Mode Switcher Tabs on Mobile */
@@ -1452,18 +1484,19 @@ body {
     display: flex;
     align-items: center;
     gap: 0.6rem;
+    min-width: 0;
   }
 
   .mobile-num-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 28px;
+    height: 28px;
     border-radius: var(--radius-full);
     background: rgba(244, 63, 94, 0.18);
     color: var(--accent-tamil);
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     font-weight: 800;
     flex-shrink: 0;
   }
@@ -1471,6 +1504,10 @@ body {
   .tamil-main-phrase {
     font-size: 1.15rem;
     font-weight: 700;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   /* Spoken Language Rows in Card */
@@ -1497,6 +1534,7 @@ body {
     border-radius: var(--radius-sm);
     white-space: nowrap;
     align-self: center;
+    flex-shrink: 0;
   }
 
   .tag-te { background: rgba(16, 185, 129, 0.2); color: #34d399; }
@@ -1507,27 +1545,38 @@ body {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    min-width: 0;
   }
 
   .speak-text-box {
-    flex: 1;
+    flex: 1 1 auto;
+    min-width: 0;
     display: flex;
     flex-direction: column;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .speak-tamil-bold {
     font-size: 1.15rem;
     line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .phonetic-sub {
     font-size: 0.75rem;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .table-audio-btn {
-    width: 38px;
-    height: 38px;
-    font-size: 1rem; /* Convenient finger tap target */
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 1rem; /* Optimal Android finger tap target */
+    flex-shrink: 0;
   }
 
   /* Mobile Action in Card Header */
@@ -1562,8 +1611,22 @@ body {
     margin: 0.2rem 0;
   }
 
+  .convo-row .cell-english .english-phrase {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
   [data-theme="light"] .convo-row .cell-english {
     background: #e0f2fe;
+  }
+
+  .convo-dialogue-table .table-audio-btn {
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    min-height: 38px !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0;
   }
 
   /* Story Mobile Responsive overrides */
@@ -2693,6 +2756,8 @@ body {
     max-width: 100%;
     border-radius: 16px 16px 0 0;
     max-height: 80vh;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.85);
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
   }
   .custom-menu-list {
     max-height: 55vh;
@@ -3777,7 +3842,8 @@ body {
   .single-slate-panel .slate-audio-btn {
     width: 100%;
     justify-content: center;
-    min-height: 38px;
+    min-height: 40px;
+    font-size: 0.88rem;
   }
 
   .lightbox-col-header .slate-audio-btn {
