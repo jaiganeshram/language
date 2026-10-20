@@ -69,7 +69,7 @@
         💬 நேரடி உரையாடல்கள் (Conversations)
       </a>
       <a href="stories.html" class="page-nav-item">
-        📚 15 வரிக் கதைகள் (Classic Stories)
+        📚 சிறுகதைகள் (Classic Stories)
       </a>
       <a href="daily_reading.html" class="page-nav-item active">
         🖼️ தினசரி வாசிப்பு & கதைகள் (Daily Reading)
@@ -85,7 +85,14 @@
 
   <!-- Main Content Container -->
   <main class="main-table-wrapper">
-
+    <section class="table-intro-banner page-intro-banner" aria-labelledby="daily-reading-title">
+      <div class="intro-content">
+        <span class="page-kicker">தினசரி வாசிப்பு · 5 மொழிகள்</span>
+        <h1 class="table-main-title" id="daily-reading-title">அன்றாட வாசிப்பும் சூழல் கதைகளும்</h1>
+        <p class="table-desc">வீடு, பயணம், வேலை, கடைகள் போன்ற நிஜ வாழ்க்கைச் சூழல்களைத் தமிழில் வாசித்து, ஆங்கிலம், தெலுங்கு, கன்னடம், இந்தி ஆகிய மொழிகளுடன் ஒப்பிடுங்கள். ஒவ்வொரு பகுதியையும் கேட்டு, படித்ததாகக் குறித்துவைத்து உங்கள் முன்னேற்றத்தைத் தொடருங்கள்.</p>
+      </div>
+      <div class="total-badge" id="total-story-badge">உள்ளடக்கங்கள் ஏற்றப்படுகின்றன…</div>
+    </section>
 
     <!-- Table View Switcher (To-Learn Stories vs Read Stories) -->
     <div class="table-mode-tabs-wrapper">
@@ -137,7 +144,7 @@
               <!-- Rendered dynamically with prominent always-visible scrollbar -->
             </div>
             <div class="custom-menu-footer">
-              <span id="story-custom-count-badge">மொத்தம் 120 கதைகள்</span>
+              <span id="story-custom-count-badge">மொத்தம் 130 கதைகள்</span>
               <span class="custom-menu-scroll-hint">↕ ஸ்க்ரோல் பார் மூலம் உருட்டலாம்</span>
             </div>
           </div>
@@ -279,6 +286,7 @@
 
   <!-- Scripts -->
   <script src="js/data/daily_reading_data.js"></script>
+  <script src="js/data/daily_reading_extra.js"></script>
   <script src="js/data/vocab_dictionary.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/daily_reading.js"></script>

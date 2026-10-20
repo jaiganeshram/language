@@ -1,5 +1,5 @@
 // Stories Application Controller
-// 15-Line Simple Stories in Tamil, English, Telugu, Kannada, and Hindi
+// Simple multilingual stories in Tamil, English, Telugu, Kannada, and Hindi
 // Features Separate Language Panels, Full Story Audio Playback & Two-Table System
 
 class StoriesApp {
@@ -446,7 +446,7 @@ class StoriesApp {
               <span class="convo-icon-pill">${story.icon}</span>
               <div>
                 <h2 class="convo-title-ta">${story.title}</h2>
-                <span class="convo-title-en">${story.titleEn} (15 Lines)</span>
+                <span class="convo-title-en">${story.titleEn} (${story.lines.length} Lines)</span>
               </div>
             </div>
 
@@ -696,7 +696,7 @@ class StoriesApp {
     if (iconEl) iconEl.innerText = story.icon || '📚';
     if (titleTaEl) titleTaEl.innerText = story.title;
     if (titleEnEl) titleEnEl.innerText = story.titleEn;
-    if (badgeEl) badgeEl.innerText = '15 வரிகள்';
+    if (badgeEl) badgeEl.innerText = `${story.lines.length} வரிகள்`;
 
     // Populate Topic Selector in Lightbox Header
     const jumpSelect = document.getElementById('lb-story-jump-select');

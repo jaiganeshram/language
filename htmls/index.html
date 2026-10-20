@@ -29,26 +29,42 @@
     </div>
   </header>
 
-  <main class="main-wrapper" style="max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem;">
-    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
-      <h2 style="font-size: 1.6rem; margin-bottom: 0.5rem; color: #fff;">📚 Complete Index of 100 Static HTML Story Pages</h2>
-      <p style="color: var(--text-secondary); font-size: 0.95rem;">
-        Each story below is a pure, standalone <strong>.html</strong> file with zero dependencies on servers or python. You can open any page directly in your browser.
-      </p>
-    </div>
+  <main class="main-wrapper archive-main">
+    <section class="archive-intro" aria-labelledby="archive-title">
+      <span class="page-kicker">தமிழ் · Normal English · Advanced English</span>
+      <h1 id="archive-title">📚 100 கதைகளின் முழுத் தொகுப்பு</h1>
+      <p>தலைப்பு, தமிழ் பெயர் அல்லது category மூலம் கதையைத் தேடி, விரும்பிய standalone HTML பக்கத்தைத் திறக்கலாம்.</p>
+    </section>
 
-    <div style="overflow-x: auto; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-      <table style="width: 100%; border-collapse: collapse; text-align: left;">
+    <section class="archive-browser" aria-label="கதைத் தொகுப்பைத் தேடவும் வடிகட்டவும்">
+      <div class="archive-toolbar">
+        <label class="archive-search-field" for="archive-search">
+          <span>கதையைத் தேடுக</span>
+          <input id="archive-search" type="search" placeholder="ஆங்கிலம், தமிழ், தலைப்பு அல்லது category..." autocomplete="off">
+        </label>
+        <label class="archive-category-field" for="archive-category">
+          <span>பிரிவு</span>
+          <select id="archive-category">
+            <option value="all">அனைத்து பிரிவுகளும்</option>
+          </select>
+        </label>
+        <p class="archive-results" id="archive-results" role="status" aria-live="polite"></p>
+      </div>
+      <p class="archive-empty" id="archive-empty" hidden>இந்தத் தேடலுக்கு கதைகள் கிடைக்கவில்லை. வேறு சொல்லை அல்லது பிரிவைத் தேர்வு செய்யுங்கள்.</p>
+    </section>
+
+    <div class="archive-table-shell">
+      <table class="archive-table">
         <thead>
           <tr style="border-bottom: 2px solid var(--border-subtle); background: rgba(255,255,255,0.02);">
-            <th style="padding: 0.9rem 1rem;">#</th>
-            <th style="padding: 0.9rem 1rem;">English Title</th>
-            <th style="padding: 0.9rem 1rem;">தமிழ் தலைப்பு</th>
-            <th style="padding: 0.9rem 1rem;">Category</th>
-            <th style="padding: 0.9rem 1rem;">Direct Static Link</th>
+            <th scope="col">#</th>
+            <th scope="col">English Title</th>
+            <th scope="col">தமிழ் தலைப்பு</th>
+            <th scope="col">Category</th>
+            <th scope="col">கதைப் பக்கம்</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="archive-story-rows">
           
     <tr style="border-bottom: 1px solid var(--border-subtle);">
       <td style="padding: 0.75rem 1rem; font-weight: 700; color: #38bdf8;">#1</td>
@@ -1354,5 +1370,46 @@
       </table>
     </div>
   </main>
+  <script>
+    (() => {
+      const rowsContainer = document.getElementById('archive-story-rows');
+      const searchInput = document.getElementById('archive-search');
+      const categorySelect = document.getElementById('archive-category');
+      const resultLabel = document.getElementById('archive-results');
+      const emptyState = document.getElementById('archive-empty');
+      const rows = Array.from(rowsContainer.querySelectorAll('tr'));
+      const categories = [...new Set(rows.map((row) => row.cells[3]?.textContent.trim()).filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+
+      categories.forEach((category) => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categorySelect.append(option);
+      });
+
+      const updateArchive = () => {
+        const query = searchInput.value.trim().toLocaleLowerCase();
+        const category = categorySelect.value;
+        let visibleCount = 0;
+
+        rows.forEach((row) => {
+          const matchesSearch = !query || row.textContent.toLocaleLowerCase().includes(query);
+          const matchesCategory = category === 'all' || row.cells[3]?.textContent.trim() === category;
+          row.hidden = !(matchesSearch && matchesCategory);
+          if (!row.hidden) visibleCount += 1;
+        });
+
+        resultLabel.textContent = query || category !== 'all'
+          ? `${visibleCount} / ${rows.length} கதைகள்`
+          : `மொத்தம் ${rows.length} கதைகள்`;
+        emptyState.hidden = visibleCount !== 0;
+      };
+
+      searchInput.addEventListener('input', updateArchive);
+      categorySelect.addEventListener('change', updateArchive);
+      updateArchive();
+    })();
+  </script>
 </body>
 </html>
